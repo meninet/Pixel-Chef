@@ -1,0 +1,2375 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pixel Chef: O Restaurante Molecular</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-dark: #1a0a02;
+  --bg-mid: #2d1506;
+  --wood: #5c3317;
+  --wood-light: #7a4520;
+  --tile-bg: #f5e6c8;
+  --tile-line: #e8d5a8;
+  --orange: #d4631a;
+  --orange-light: #f07d2e;
+  --yellow: #ffd166;
+  --green: #06d6a0;
+  --green-dark: #04a87e;
+  --red: #ef476f;
+  --red-dark: #c0394f;
+  --blue: #118ab2;
+  --blue-light: #4db8d8;
+  --purple: #7b2d8b;
+  --cream: #fff8ee;
+  --text-dark: #2d1506;
+  --text-light: #fff8ee;
+  --shadow: rgba(0,0,0,0.4);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg-dark);
+  min-height: 100vh;
+  overflow-x: hidden;
+  color: var(--text-light);
+}
+
+/* ===== BACKGROUND KITCHEN TILES ===== */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(92,51,23,0.6) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(92,51,23,0.6) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-color: var(--bg-mid);
+  z-index: -2;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(212,99,26,0.15) 0%, transparent 70%);
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* ===== WRAPPER ===== */
+#game-wrapper {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 12px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== HEADER ===== */
+.game-header {
+  background: linear-gradient(135deg, var(--wood) 0%, var(--wood-light) 100%);
+  border: 3px solid var(--yellow);
+  border-radius: 16px;
+  padding: 10px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+.header-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 14px;
+}
+
+.header-label { color: var(--tile-line); font-size: 11px; font-family: 'Nunito', sans-serif; font-weight: 700; }
+.header-value { color: var(--yellow); }
+.header-pts { color: var(--green); }
+
+.progress-bar-wrap {
+  width: 100%;
+  height: 10px;
+  background: rgba(0,0,0,0.4);
+  border-radius: 10px;
+  margin-top: 6px;
+  overflow: hidden;
+  border: 2px solid rgba(255,255,255,0.1);
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--green), var(--yellow));
+  border-radius: 10px;
+  transition: width 0.6s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+/* ===== SCREENS ===== */
+.screen { display: none; flex-direction: column; align-items: center; flex-grow: 1; }
+.screen.active { display: flex; }
+
+/* ===== CHEF CHARACTER ===== */
+.chef-wrap { display: flex; flex-direction: column; align-items: center; margin: 10px 0; }
+
+.chef {
+  width: 90px;
+  height: 110px;
+  position: relative;
+  transition: transform 0.3s;
+}
+
+.chef:hover { transform: translateY(-4px); }
+
+/* Chef hat */
+.chef-hat-brim {
+  width: 70px; height: 12px;
+  background: #fff;
+  border-radius: 6px;
+  margin: 0 auto;
+  box-shadow: 0 2px 4px var(--shadow);
+}
+.chef-hat-top {
+  width: 50px; height: 36px;
+  background: #fff;
+  border-radius: 8px 8px 0 0;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+}
+.chef-hat-top::after {
+  content: "";
+  position: absolute;
+  bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 30px; height: 3px;
+  background: var(--tile-line);
+  border-radius: 2px;
+}
+
+/* Chef face */
+.chef-face {
+  width: 56px; height: 52px;
+  background: #f9d89c;
+  border-radius: 50% 50% 45% 45%;
+  margin: 0 auto;
+  position: relative;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.chef-glasses {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.chef-glass {
+  width: 14px; height: 10px;
+  border: 2px solid #5c3317;
+  border-radius: 4px;
+  background: rgba(17,138,178,0.3);
+  position: relative;
+}
+
+.chef-glass::after {
+  content: "";
+  position: absolute;
+  top: 3px; right: -6px;
+  width: 5px; height: 1.5px;
+  background: #5c3317;
+}
+
+.chef-eyes { display: flex; gap: 10px; }
+.chef-eye {
+  width: 7px; height: 7px;
+  background: #2d1506;
+  border-radius: 50%;
+  transition: all 0.3s;
+}
+
+.chef.happy .chef-eye {
+  height: 4px;
+  border-radius: 0 0 4px 4px;
+  background: #2d1506;
+}
+
+.chef.sad .chef-eye {
+  height: 4px;
+  border-radius: 4px 4px 0 0;
+  background: #2d1506;
+}
+
+.chef.surprised .chef-eye {
+  width: 9px; height: 9px;
+}
+
+.chef-mouth {
+  width: 14px; height: 4px;
+  background: #c0394f;
+  border-radius: 0 0 6px 6px;
+  transition: all 0.3s;
+}
+
+.chef.happy .chef-mouth { width: 18px; height: 6px; border-radius: 0 0 8px 8px; }
+.chef.sad .chef-mouth { border-radius: 6px 6px 0 0; }
+.chef.surprised .chef-mouth { width: 10px; height: 10px; border-radius: 50%; }
+
+/* Chef body */
+.chef-body {
+  width: 60px; height: 28px;
+  background: #fff;
+  border-radius: 6px 6px 0 0;
+  margin: 0 auto;
+  position: relative;
+  border: 2px solid var(--tile-line);
+}
+
+.chef-body::before {
+  content: "🍴";
+  position: absolute;
+  top: 4px; left: 50%; transform: translateX(-50%);
+  font-size: 12px;
+}
+
+.chef-legs {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.chef-leg {
+  width: 18px; height: 14px;
+  background: #3d2060;
+  border-radius: 0 0 4px 4px;
+}
+
+/* Speech bubble */
+.speech-bubble {
+  background: var(--cream);
+  border: 3px solid var(--orange);
+  border-radius: 18px;
+  padding: 14px 18px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text-dark);
+  font-weight: 700;
+  width: 100%;
+  max-width: 640px;
+  margin: 8px 0;
+  position: relative;
+  box-shadow: 0 4px 0 var(--orange), 0 6px 12px var(--shadow);
+}
+
+.speech-bubble::before {
+  content: "";
+  position: absolute;
+  top: -16px; left: 40px;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-bottom: 16px solid var(--orange);
+}
+
+.speech-bubble::after {
+  content: "";
+  position: absolute;
+  top: -10px; left: 43px;
+  border-left: 9px solid transparent;
+  border-right: 9px solid transparent;
+  border-bottom: 12px solid var(--cream);
+}
+
+.speaker-name {
+  font-family: 'Fredoka One', cursive;
+  font-size: 13px;
+  color: var(--orange);
+  margin-bottom: 4px;
+  display: block;
+}
+
+/* ===== BUTTONS ===== */
+.btn {
+  font-family: 'Fredoka One', cursive;
+  font-size: 16px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  outline: none;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.4);
+}
+
+.btn:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,0.4); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: 0 4px 0 rgba(0,0,0,0.2); }
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--orange) 0%, var(--orange-light) 100%);
+  color: #fff;
+  font-size: 18px;
+  padding: 14px 32px;
+  border-radius: 14px;
+  box-shadow: 0 5px 0 var(--red-dark), 0 8px 16px var(--shadow);
+}
+.btn-primary:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-2px); box-shadow: 0 7px 0 var(--red-dark), 0 10px 20px var(--shadow); }
+
+.btn-secondary {
+  background: linear-gradient(135deg, var(--wood) 0%, var(--wood-light) 100%);
+  color: var(--yellow);
+  border: 2px solid var(--yellow);
+}
+.btn-secondary:hover:not(:disabled) { background: var(--wood-light); }
+
+.btn-answer {
+  background: linear-gradient(135deg, #1e3a5f 0%, #264d7a 100%);
+  color: var(--cream);
+  border: 2px solid var(--blue-light);
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 13px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  text-align: left;
+  min-width: 180px;
+  flex: 1;
+  box-shadow: 0 3px 0 #0d1f33, 0 5px 10px var(--shadow);
+  transition: all 0.15s;
+  line-height: 1.4;
+}
+.btn-answer:hover:not(:disabled) { background: linear-gradient(135deg, #264d7a 0%, #2d5f94 100%); border-color: var(--yellow); transform: translateY(-2px); }
+
+.btn-answer.correct {
+  background: linear-gradient(135deg, var(--green-dark) 0%, var(--green) 100%) !important;
+  border-color: #fff !important;
+  color: #fff !important;
+  animation: popCorrect 0.4s ease;
+}
+
+.btn-answer.wrong {
+  background: linear-gradient(135deg, var(--red-dark) 0%, var(--red) 100%) !important;
+  border-color: #fff !important;
+  color: #fff !important;
+  animation: shakeWrong 0.4s ease;
+}
+
+@keyframes popCorrect {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+}
+
+@keyframes shakeWrong {
+  0%,100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  75% { transform: translateX(8px); }
+}
+
+.btn-hint {
+  background: linear-gradient(135deg, #4a2060 0%, #6b2d8b 100%);
+  color: var(--yellow);
+  border: 2px solid var(--purple);
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 12px;
+  padding: 8px 16px;
+  box-shadow: 0 3px 0 #2a0d40;
+}
+.btn-hint:hover:not(:disabled) { filter: brightness(1.2); }
+
+/* ===== START SCREEN ===== */
+#screen-start {
+  justify-content: center;
+  text-align: center;
+  padding: 20px;
+  gap: 12px;
+}
+
+.restaurant-sign {
+  background: linear-gradient(135deg, var(--wood) 0%, var(--wood-light) 50%, var(--wood) 100%);
+  border: 4px solid var(--yellow);
+  border-radius: 20px;
+  padding: 24px 36px;
+  box-shadow: 0 6px 0 rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.15), 0 0 40px rgba(212,99,26,0.3);
+  position: relative;
+  max-width: 600px;
+}
+
+.restaurant-sign::before, .restaurant-sign::after {
+  content: "🪵";
+  position: absolute;
+  top: 50%; transform: translateY(-50%);
+  font-size: 24px;
+}
+.restaurant-sign::before { left: -32px; }
+.restaurant-sign::after { right: -32px; }
+
+.game-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 32px;
+  color: var(--yellow);
+  text-shadow: 3px 3px 0 var(--orange), 5px 5px 0 rgba(0,0,0,0.4);
+  line-height: 1.3;
+  margin-bottom: 8px;
+}
+
+.game-emoji { font-size: 48px; display: block; margin-bottom: 8px; animation: bounce 2s infinite; }
+
+@keyframes bounce {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.game-subtitle {
+  font-size: 13px;
+  color: var(--tile-line);
+  line-height: 1.8;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.bncc-badge {
+  display: inline-block;
+  background: rgba(6,214,160,0.2);
+  border: 2px solid var(--green);
+  border-radius: 8px;
+  padding: 5px 14px;
+  font-size: 11px;
+  color: var(--green);
+  font-weight: 800;
+  margin-bottom: 16px;
+}
+
+/* ===== NAME SCREEN ===== */
+#screen-name { justify-content: center; text-align: center; padding: 20px; gap: 12px; }
+
+.pixel-input {
+  font-family: 'Fredoka One', cursive;
+  font-size: 20px;
+  padding: 14px 20px;
+  background: var(--cream);
+  color: var(--text-dark);
+  border: 3px solid var(--orange);
+  border-radius: 14px;
+  text-align: center;
+  width: 100%;
+  max-width: 380px;
+  outline: none;
+  box-shadow: 0 4px 0 var(--orange), inset 0 2px 4px rgba(0,0,0,0.1);
+  transition: border-color 0.2s;
+}
+
+.pixel-input:focus { border-color: var(--yellow); box-shadow: 0 4px 0 var(--orange), 0 0 0 3px rgba(255,209,102,0.3), inset 0 2px 4px rgba(0,0,0,0.1); }
+.pixel-input::placeholder { color: #bbb; font-size: 14px; }
+
+/* ===== CARDS SCREEN ===== */
+#screen-cards { padding: 10px; gap: 10px; }
+
+.cards-phase-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 20px;
+  color: var(--yellow);
+  text-align: center;
+  text-shadow: 2px 2px 0 var(--orange);
+}
+
+.card-wrap {
+  background: linear-gradient(135deg, var(--cream) 0%, #fff5e0 100%);
+  border: 3px solid var(--orange);
+  border-radius: 20px;
+  padding: 24px;
+  width: 100%;
+  max-width: 680px;
+  min-height: 280px;
+  color: var(--text-dark);
+  box-shadow: 0 6px 0 var(--orange), 0 10px 24px var(--shadow);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.card-wrap::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 6px;
+  background: linear-gradient(90deg, var(--orange), var(--yellow), var(--green), var(--blue-light), var(--orange));
+  border-radius: 18px 18px 0 0;
+}
+
+.card-emoji { font-size: 52px; line-height: 1; }
+
+.card-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 18px;
+  color: var(--orange);
+  text-align: center;
+  line-height: 1.4;
+}
+
+.card-body {
+  font-size: 13px;
+  line-height: 1.9;
+  text-align: center;
+  color: #3d2010;
+  font-weight: 600;
+  max-width: 560px;
+}
+
+.hl { color: var(--orange); font-weight: 800; background: rgba(212,99,26,0.12); padding: 1px 5px; border-radius: 4px; }
+.hl-green { color: var(--green-dark); font-weight: 800; background: rgba(6,214,160,0.12); padding: 1px 5px; border-radius: 4px; }
+.hl-blue { color: var(--blue); font-weight: 800; background: rgba(17,138,178,0.12); padding: 1px 5px; border-radius: 4px; }
+.hl-red { color: var(--red-dark); font-weight: 800; background: rgba(239,71,111,0.12); padding: 1px 5px; border-radius: 4px; }
+.hl-yellow { color: #b8870a; font-weight: 800; background: rgba(255,209,102,0.25); padding: 1px 5px; border-radius: 4px; }
+
+.card-nav {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.card-dots { display: flex; gap: 8px; }
+.card-dot {
+  width: 12px; height: 12px;
+  background: var(--tile-line);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 2px solid transparent;
+}
+.card-dot.active { background: var(--orange); border-color: var(--yellow); transform: scale(1.2); }
+
+/* Particle animation for phase 1 cards */
+.particle-demo {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  align-items: flex-end;
+  margin: 8px 0;
+}
+
+.pstate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.pstate-label {
+  font-family: 'Fredoka One', cursive;
+  font-size: 11px;
+  color: var(--orange);
+}
+
+.pstate-box {
+  width: 80px; height: 70px;
+  background: rgba(0,0,0,0.06);
+  border: 2px solid var(--tile-line);
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Solid particles */
+.p-solid .part { position: absolute; width: 9px; height: 9px; border-radius: 2px; }
+.p-solid .part:nth-child(1) { top:8px; left:8px; background:#ef476f; }
+.p-solid .part:nth-child(2) { top:8px; left:22px; background:#ef476f; }
+.p-solid .part:nth-child(3) { top:8px; left:36px; background:#ef476f; }
+.p-solid .part:nth-child(4) { top:8px; left:50px; background:#ef476f; }
+.p-solid .part:nth-child(5) { top:22px; left:8px; background:#c0394f; }
+.p-solid .part:nth-child(6) { top:22px; left:22px; background:#c0394f; }
+.p-solid .part:nth-child(7) { top:22px; left:36px; background:#c0394f; }
+.p-solid .part:nth-child(8) { top:22px; left:50px; background:#c0394f; }
+.p-solid .part:nth-child(9) { top:36px; left:8px; background:#ef476f; }
+.p-solid .part:nth-child(10) { top:36px; left:22px; background:#ef476f; }
+.p-solid .part:nth-child(11) { top:36px; left:36px; background:#ef476f; }
+.p-solid .part:nth-child(12) { top:36px; left:50px; background:#ef476f; }
+.p-solid .part:nth-child(13) { top:50px; left:8px; background:#c0394f; }
+.p-solid .part:nth-child(14) { top:50px; left:22px; background:#c0394f; }
+.p-solid .part:nth-child(15) { top:50px; left:36px; background:#c0394f; }
+.p-solid .part:nth-child(16) { top:50px; left:50px; background:#c0394f; }
+
+/* Liquid particles */
+.p-liquid .part { position: absolute; width: 8px; height: 8px; border-radius: 50%; animation: liquidMove 2s infinite alternate; }
+.p-liquid .part:nth-child(1)  { top:30px; left:6px;  background:#29adff; animation-delay:0s; }
+.p-liquid .part:nth-child(2)  { top:20px; left:18px; background:#118ab2; animation-delay:0.2s; }
+.p-liquid .part:nth-child(3)  { top:35px; left:30px; background:#29adff; animation-delay:0.4s; }
+.p-liquid .part:nth-child(4)  { top:25px; left:44px; background:#118ab2; animation-delay:0.1s; }
+.p-liquid .part:nth-child(5)  { top:42px; left:10px; background:#4db8d8; animation-delay:0.3s; }
+.p-liquid .part:nth-child(6)  { top:48px; left:24px; background:#29adff; animation-delay:0.5s; }
+.p-liquid .part:nth-child(7)  { top:40px; left:52px; background:#118ab2; animation-delay:0.15s; }
+.p-liquid .part:nth-child(8)  { top:55px; left:36px; background:#4db8d8; animation-delay:0.35s; }
+
+@keyframes liquidMove {
+  0% { transform: translate(0,0); }
+  100% { transform: translate(4px,-4px); }
+}
+
+/* Gas particles */
+.p-gas .part { position: absolute; width: 7px; height: 7px; border-radius: 50%; animation: gasMove 1.5s infinite; }
+.p-gas .part:nth-child(1)  { top:5px;  left:5px;  background:#06d6a0; animation-delay:0s; animation-duration:1.8s; }
+.p-gas .part:nth-child(2)  { top:15px; left:55px; background:#04a87e; animation-delay:0.3s; animation-duration:1.4s; }
+.p-gas .part:nth-child(3)  { top:35px; left:20px; background:#06d6a0; animation-delay:0.6s; animation-duration:2s; }
+.p-gas .part:nth-child(4)  { top:10px; left:38px; background:#04a87e; animation-delay:0.9s; animation-duration:1.6s; }
+.p-gas .part:nth-child(5)  { top:50px; left:8px;  background:#06d6a0; animation-delay:0.15s; animation-duration:1.9s; }
+.p-gas .part:nth-child(6)  { top:55px; left:48px; background:#04a87e; animation-delay:0.45s; animation-duration:1.3s; }
+
+@keyframes gasMove {
+  0%   { transform: translate(0,0); opacity:1; }
+  50%  { transform: translate(12px,-10px); opacity:0.7; }
+  100% { transform: translate(-6px,8px); opacity:1; }
+}
+
+/* ===== GAME SCREEN ===== */
+#screen-game { padding: 10px; gap: 8px; }
+
+.phase-label {
+  font-family: 'Fredoka One', cursive;
+  font-size: 13px;
+  color: var(--orange-light);
+  text-align: center;
+}
+
+.question-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 20px;
+  color: var(--yellow);
+  text-align: center;
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.4);
+  line-height: 1.3;
+}
+
+.q-counter {
+  font-size: 11px;
+  color: var(--tile-line);
+  text-align: center;
+  font-weight: 700;
+}
+
+/* Visual display panel */
+.display-panel {
+  width: 100%;
+  max-width: 680px;
+  background: linear-gradient(135deg, #0d2236 0%, #0a1a2b 100%);
+  border: 3px solid var(--blue-light);
+  border-radius: 16px;
+  padding: 16px;
+  min-height: 160px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 4px 0 #061422, inset 0 0 30px rgba(17,138,178,0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.display-panel::before {
+  content: "VISUALIZADOR MOLECULAR";
+  position: absolute;
+  top: 8px; left: 50%; transform: translateX(-50%);
+  font-size: 9px;
+  color: rgba(77,184,216,0.5);
+  letter-spacing: 2px;
+  font-weight: 800;
+}
+
+/* Containers for phase visuals */
+.visual-container { display: flex; gap: 20px; align-items: center; justify-content: center; flex-wrap: wrap; }
+
+/* State box (phase 1) */
+.state-display-box {
+  width: 110px; height: 100px;
+  background: rgba(255,255,255,0.04);
+  border: 2px solid rgba(77,184,216,0.4);
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Scene display (phase 2) */
+.scene-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+}
+
+.scene-emoji { font-size: 56px; filter: drop-shadow(0 0 8px rgba(255,255,255,0.3)); }
+.scene-label {
+  font-family: 'Fredoka One', cursive;
+  font-size: 12px;
+  color: var(--blue-light);
+  text-align: center;
+}
+
+/* Graph display (phase 3) */
+.graph-container {
+  width: 100%;
+  max-width: 520px;
+  padding-top: 20px;
+}
+
+/* Answer area */
+.answer-area {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  width: 100%;
+  max-width: 680px;
+}
+
+.hint-text {
+  font-size: 12px;
+  color: var(--yellow);
+  background: rgba(123,45,139,0.3);
+  border: 2px solid var(--purple);
+  border-radius: 10px;
+  padding: 8px 14px;
+  text-align: center;
+  line-height: 1.7;
+  font-weight: 700;
+  max-width: 640px;
+  width: 100%;
+  display: none;
+}
+
+/* ===== PHASE RESULT ===== */
+#screen-phase-result {
+  justify-content: center;
+  text-align: center;
+  padding: 20px;
+  gap: 12px;
+}
+
+.result-panel {
+  background: linear-gradient(135deg, var(--cream) 0%, #fff5e0 100%);
+  border: 3px solid var(--yellow);
+  border-radius: 20px;
+  padding: 28px;
+  max-width: 600px;
+  width: 100%;
+  color: var(--text-dark);
+  box-shadow: 0 6px 0 var(--orange), 0 10px 24px var(--shadow);
+}
+
+.result-phase-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 22px;
+  color: var(--orange);
+  margin-bottom: 12px;
+}
+
+.stars-row {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 14px 0;
+}
+
+.star-big {
+  font-size: 40px;
+  opacity: 0.2;
+  transition: all 0.4s;
+  filter: grayscale(1);
+}
+
+.star-big.earned {
+  opacity: 1;
+  filter: none;
+  animation: starPop 0.5s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+@keyframes starPop {
+  0% { transform: scale(0) rotate(-20deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+.result-score {
+  font-size: 13px;
+  color: #5c3317;
+  font-weight: 700;
+  line-height: 2;
+}
+
+.result-pts {
+  font-family: 'Fredoka One', cursive;
+  font-size: 28px;
+  color: var(--orange);
+}
+
+/* ===== CERTIFICATE ===== */
+#screen-certificate {
+  justify-content: center;
+  text-align: center;
+  padding: 20px;
+  gap: 12px;
+}
+
+.cert-frame {
+  background: linear-gradient(145deg, #fffdf5 0%, #fff8ee 50%, #fffdf5 100%);
+  border: 4px solid var(--yellow);
+  border-radius: 24px;
+  padding: 32px 28px;
+  max-width: 640px;
+  width: 100%;
+  color: var(--text-dark);
+  box-shadow: 0 8px 0 var(--orange), 0 14px 30px var(--shadow), inset 0 0 60px rgba(255,209,102,0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.cert-frame::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border: 2px dashed rgba(212,99,26,0.3);
+  border-radius: 18px;
+  pointer-events: none;
+}
+
+.cert-seal { font-size: 56px; display: block; margin-bottom: 6px; animation: rotateSeal 4s linear infinite; }
+@keyframes rotateSeal { 0%,100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+
+.cert-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 14px;
+  color: #8a5c30;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.cert-name {
+  font-family: 'Fredoka One', cursive;
+  font-size: 30px;
+  color: var(--orange);
+  text-shadow: 2px 2px 0 rgba(212,99,26,0.3);
+  margin: 10px 0;
+  word-break: break-word;
+}
+
+.cert-rank {
+  font-family: 'Fredoka One', cursive;
+  font-size: 20px;
+  color: var(--text-dark);
+  margin: 6px 0;
+}
+
+.cert-pts {
+  font-family: 'Fredoka One', cursive;
+  font-size: 26px;
+  color: var(--green-dark);
+}
+
+.cert-stars { font-size: 30px; margin: 8px 0; }
+
+.cert-bncc {
+  font-size: 10px;
+  color: #8a5c30;
+  margin-top: 14px;
+  line-height: 2;
+  font-weight: 700;
+  opacity: 0.8;
+}
+
+.cert-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+
+/* ===== ANIMATIONS ===== */
+.fade-in { animation: fadeIn 0.4s ease; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Hypothesis question special style */
+.hypothesis-banner {
+  background: linear-gradient(135deg, #4a0d6b 0%, #6b1a9a 100%);
+  border: 3px solid var(--yellow);
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-size: 12px;
+  color: var(--yellow);
+  font-weight: 800;
+  text-align: center;
+  max-width: 640px;
+  width: 100%;
+  box-shadow: 0 3px 0 #2a0d40;
+}
+
+/* Table for phase 2 dual mechanic */
+.dual-mechanic {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 640px;
+}
+
+.dual-label {
+  font-family: 'Fredoka One', cursive;
+  font-size: 13px;
+  color: var(--blue-light);
+  text-align: center;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 600px) {
+  .game-title { font-size: 22px; }
+  .restaurant-sign { padding: 18px 24px; }
+  .restaurant-sign::before, .restaurant-sign::after { display: none; }
+  .card-wrap { padding: 16px; }
+  .card-body { font-size: 12px; }
+  .btn-answer { font-size: 12px; padding: 10px 12px; min-width: 140px; }
+  .particle-demo { gap: 12px; }
+  .pstate-box { width: 65px; height: 60px; }
+  .cert-name { font-size: 22px; }
+  .cert-pts { font-size: 20px; }
+}
+</style>
+</head>
+<body>
+<div id="game-wrapper">
+
+<!-- HEADER -->
+<div class="game-header" id="game-header" style="display:none;">
+  <div class="header-item">
+    <span class="header-label">FASE</span>
+    <span class="header-value" id="ui-phase">1/4</span>
+  </div>
+  <div class="header-item">
+    <span class="header-label">PONTOS</span>
+    <span class="header-pts" id="ui-pts">0</span>
+  </div>
+  <div class="header-item">
+    <span class="header-label">⭐</span>
+    <span class="header-value" id="ui-stars">☆☆☆</span>
+  </div>
+  <div class="progress-bar-wrap" style="flex-basis:100%;">
+    <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<!-- SCREEN 1: START -->
+<div class="screen active" id="screen-start">
+  <div class="chef-wrap" style="margin-bottom:0;">
+    <div class="chef" id="chef-start">
+      <div class="chef-hat-top"></div>
+      <div class="chef-hat-brim"></div>
+      <div class="chef-face">
+        <div class="chef-glasses"><div class="chef-glass"></div><div class="chef-glass"></div></div>
+        <div class="chef-eyes"><div class="chef-eye"></div><div class="chef-eye"></div></div>
+        <div class="chef-mouth"></div>
+      </div>
+      <div class="chef-body"></div>
+      <div class="chef-legs"><div class="chef-leg"></div><div class="chef-leg"></div></div>
+    </div>
+  </div>
+
+  <div class="restaurant-sign fade-in">
+    <span class="game-emoji">🍳</span>
+    <h1 class="game-title">PIXEL CHEF:<br>O RESTAURANTE MOLECULAR</h1>
+    <p class="game-subtitle">
+      Uma crise inesperada no restaurante! As substâncias estão se transformando sozinhas e o Chef Mol precisa da sua ajuda para entender os estados da matéria e controlar as mudanças.
+    </p>
+    <div class="bncc-badge">BNCC: EF09CI01 | SAEB: E1A3 e E1B5</div>
+    <button class="btn btn-primary" onclick="goToNameScreen()" style="margin-top:12px;">🍽️ ENTRAR NO RESTAURANTE</button>
+  </div>
+</div>
+
+<!-- SCREEN 2: NAME -->
+<div class="screen" id="screen-name">
+  <div class="chef-wrap">
+    <div class="chef happy" id="chef-name">
+      <div class="chef-hat-top"></div>
+      <div class="chef-hat-brim"></div>
+      <div class="chef-face">
+        <div class="chef-glasses"><div class="chef-glass"></div><div class="chef-glass"></div></div>
+        <div class="chef-eyes"><div class="chef-eye"></div><div class="chef-eye"></div></div>
+        <div class="chef-mouth"></div>
+      </div>
+      <div class="chef-body"></div>
+      <div class="chef-legs"><div class="chef-leg"></div><div class="chef-leg"></div></div>
+    </div>
+  </div>
+  <div class="speech-bubble" style="max-width:500px;">
+    <span class="speaker-name">👨‍🍳 Chef Mol:</span>
+    Bem-vindo ao Restaurante Molecular! Sou o Chef Mol, especialista em gastronomia molecular e estados físicos da matéria. Antes de começarmos, como devo te chamar?
+  </div>
+  <p style="font-family:'Fredoka One',cursive; font-size:15px; color:var(--yellow); margin-top:8px;">SEU NOME, POR FAVOR:</p>
+  <input type="text" class="pixel-input" id="player-name-input" placeholder="Digite seu nome..." maxlength="20" autocomplete="off">
+  <br>
+  <button class="btn btn-primary" id="btn-confirm-name" onclick="confirmName()" disabled>✅ CONFIRMAR</button>
+</div>
+
+<!-- SCREEN 3: CARDS -->
+<div class="screen" id="screen-cards">
+  <p class="cards-phase-title" id="cards-title"></p>
+  <div class="chef-wrap">
+    <div class="chef" id="chef-cards">
+      <div class="chef-hat-top"></div>
+      <div class="chef-hat-brim"></div>
+      <div class="chef-face">
+        <div class="chef-glasses"><div class="chef-glass"></div><div class="chef-glass"></div></div>
+        <div class="chef-eyes"><div class="chef-eye"></div><div class="chef-eye"></div></div>
+        <div class="chef-mouth"></div>
+      </div>
+      <div class="chef-body"></div>
+      <div class="chef-legs"><div class="chef-leg"></div><div class="chef-leg"></div></div>
+    </div>
+  </div>
+  <div class="card-wrap" id="card-display">
+    <div class="card-emoji" id="card-emoji"></div>
+    <div class="card-title" id="card-title-text"></div>
+    <div class="card-body" id="card-body-text"></div>
+    <div id="card-visual-extra"></div>
+  </div>
+  <div class="card-nav">
+    <button class="btn btn-secondary" id="card-prev" onclick="prevCard()">◀ ANTERIOR</button>
+    <div class="card-dots" id="card-dots"></div>
+    <button class="btn btn-secondary" id="card-next">PRÓXIMO ▶</button>
+  </div>
+</div>
+
+<!-- SCREEN 4: GAME -->
+<div class="screen" id="screen-game">
+  <div class="phase-label" id="game-phase-label"></div>
+  <div class="question-title" id="game-item-name"></div>
+  <div class="q-counter" id="game-q-counter"></div>
+
+  <div class="chef-wrap" style="margin:6px 0;">
+    <div class="chef" id="chef-game">
+      <div class="chef-hat-top"></div>
+      <div class="chef-hat-brim"></div>
+      <div class="chef-face">
+        <div class="chef-glasses"><div class="chef-glass"></div><div class="chef-glass"></div></div>
+        <div class="chef-eyes"><div class="chef-eye"></div><div class="chef-eye"></div></div>
+        <div class="chef-mouth"></div>
+      </div>
+      <div class="chef-body"></div>
+      <div class="chef-legs"><div class="chef-leg"></div><div class="chef-leg"></div></div>
+    </div>
+  </div>
+
+  <div class="display-panel" id="display-panel">
+    <div id="visual-content"></div>
+  </div>
+
+  <div class="speech-bubble" id="game-bubble" style="max-width:680px;">
+    <span class="speaker-name">👨‍🍳 Chef Mol:</span>
+    <span id="game-dialog-text"></span>
+  </div>
+
+  <div id="hypothesis-banner" class="hypothesis-banner" style="display:none;">
+    🔮 QUESTÃO DE HIPÓTESE — Preveja o que vai acontecer antes de ver o resultado!
+  </div>
+
+  <div class="answer-area" id="answer-area"></div>
+  <div class="hint-text" id="hint-text"></div>
+</div>
+
+<!-- SCREEN 5: PHASE RESULT -->
+<div class="screen" id="screen-phase-result">
+  <div class="chef-wrap">
+    <div class="chef" id="chef-result">
+      <div class="chef-hat-top"></div>
+      <div class="chef-hat-brim"></div>
+      <div class="chef-face">
+        <div class="chef-glasses"><div class="chef-glass"></div><div class="chef-glass"></div></div>
+        <div class="chef-eyes"><div class="chef-eye"></div><div class="chef-eye"></div></div>
+        <div class="chef-mouth"></div>
+      </div>
+      <div class="chef-body"></div>
+      <div class="chef-legs"><div class="chef-leg"></div><div class="chef-leg"></div></div>
+    </div>
+  </div>
+  <div class="result-panel">
+    <div class="result-phase-title" id="result-phase-title"></div>
+    <div class="stars-row" id="result-stars"></div>
+    <div class="result-pts" id="result-pts-display">0 pts</div>
+    <div class="result-score" id="result-score-text"></div>
+    <div class="speech-bubble" id="result-dialog-bubble" style="margin-top:12px;">
+      <span class="speaker-name">👨‍🍳 Chef Mol:</span>
+      <span id="result-dialog"></span>
+    </div>
+    <button class="btn btn-primary" id="btn-next-phase" onclick="goToNextPhase()" style="margin-top:14px;">PRÓXIMO SERVIÇO ▶</button>
+  </div>
+</div>
+
+<!-- SCREEN 6: CERTIFICATE -->
+<div class="screen" id="screen-certificate">
+  <div class="cert-frame">
+    <span class="cert-seal">🏆</span>
+    <div class="cert-title">Certificado de Conclusão</div>
+    <div style="font-family:'Fredoka One',cursive; font-size:14px; color:#8a5c30;">RESTAURANTE MOLECULAR — MISSÃO COMPLETA!</div>
+    <div class="cert-name" id="cert-name"></div>
+    <div style="font-size:13px; color:#5c3317; font-weight:700; margin:6px 0;">concluiu com sucesso todas as etapas do</div>
+    <div style="font-family:'Fredoka One',cursive; font-size:16px; color:var(--orange); margin:4px 0;">PIXEL CHEF: O RESTAURANTE MOLECULAR</div>
+    <div class="cert-rank" id="cert-rank"></div>
+    <div class="cert-stars" id="cert-stars"></div>
+    <div class="cert-pts" id="cert-pts"></div>
+    <div class="cert-bncc">
+      Habilidade BNCC: EF09CI01 — Investigar as mudanças de estado físico da matéria e explicar essas transformações com base no modelo de constituição submicroscópica.<br>
+      Descritores SAEB: E1A3 (modelo submicroscópico) | E1B5 (energia e mudanças de estado)<br>
+      Ciência Plural — Desenvolvido por Professores para Professores
+    </div>
+    <div class="cert-buttons">
+      <button class="btn btn-primary" onclick="restartGame()">🔄 JOGAR NOVAMENTE</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- end game-wrapper -->
+
+<script>
+// ===== GAME DATA =====
+const PHASES = [
+  {
+    id: 1,
+    title: "FASE 1: A DESPENSA DAS PARTÍCULAS",
+    subtitle: "Identificando Estados Físicos",
+    context: "🗄️ Chef Mol abriu a despensa do restaurante e encontrou vários potes misteriosos! Cada um contém substâncias em estados físicos diferentes.",
+    cards: [
+      {
+        emoji: "🧪",
+        title: "OS TRÊS ESTADOS DA MATÉRIA",
+        body: `Toda matéria pode se apresentar em três estados físicos: <span class="hl">SÓLIDO</span>, <span class="hl-blue">LÍQUIDO</span> e <span class="hl-green">GASOSO</span>. A diferença entre eles está na forma como as <span class="hl-yellow">partículas</span> (átomos e moléculas) se organizam e se movimentam!`,
+        visual: 'particles'
+      },
+      {
+        emoji: "🧱",
+        title: "ESTADO SÓLIDO",
+        body: `No sólido, as partículas ficam <span class="hl-red">muito próximas</span> e <span class="hl-red">organizadas</span>, vibrando no lugar. Por isso os sólidos têm <span class="hl">forma própria</span> e <span class="hl">volume fixo</span>. Energia cinética das partículas: <span class="hl-red">baixa</span>. Exemplo: gelo, ferro, sal.`
+      },
+      {
+        emoji: "💧",
+        title: "ESTADO LÍQUIDO",
+        body: `No líquido, as partículas estão <span class="hl-blue">próximas mas se movem</span> livremente entre si. O líquido <span class="hl">não tem forma própria</span> (assume a forma do recipiente), mas tem <span class="hl">volume fixo</span>. Energia cinética: <span class="hl-blue">média</span>. Exemplo: água, óleo, mercúrio.`
+      },
+      {
+        emoji: "💨",
+        title: "ESTADO GASOSO",
+        body: `No gás, as partículas estão <span class="hl-green">muito afastadas</span> e se movem rapidamente em todas as direções. O gás <span class="hl">não tem forma nem volume próprios</span> — ocupa todo o espaço disponível. Energia cinética: <span class="hl-green">alta</span>. Exemplo: vapor d'água, oxigênio, CO₂.`
+      }
+    ],
+    mechanic: "identify_state",
+    options: [
+      { label: "🧱 SÓLIDO", value: "solido" },
+      { label: "💧 LÍQUIDO", value: "liquido" },
+      { label: "💨 GASOSO", value: "gasoso" }
+    ],
+    questions: [
+      {
+        name: "O que está no Pote A?",
+        dialog: "Analise o comportamento das partículas neste pote. Qual é o estado físico desta substância?",
+        visual: { type: "particles_anim", state: "solido" },
+        answer: "solido",
+        hint: "Observe: as partículas estão bem próximas, organizadas e apenas vibrando. Qual estado tem forma própria?",
+        feedback: "Correto! As partículas organizadas e compactas, vibrando no lugar, são características do estado SÓLIDO. Forma e volume fixos!",
+        wrongFeedback: "Não é esse! As partículas estão em fileiras, compactas e praticamente paradas. Isso indica organização rígida — qual estado tem forma e volume fixos?"
+      },
+      {
+        name: "O que está no Pote B?",
+        dialog: "Observe o movimento e a organização das partículas. Que estado físico é este?",
+        visual: { type: "particles_anim", state: "liquido" },
+        answer: "liquido",
+        hint: "As partículas se movem mas ficam próximas umas das outras, sem se separar muito.",
+        feedback: "Exato! Partículas próximas mas com mobilidade — estado LÍQUIDO! Volume fixo, mas sem forma própria.",
+        wrongFeedback: "Errado! As partículas se movem livremente mas permanecem próximas — não se afastam como no gás, nem estão fixas como no sólido. Qual estado tem volume fixo mas não tem forma própria?"
+      },
+      {
+        name: "O que está no Pote C?",
+        dialog: "Veja como as partículas se comportam neste pote. Consegue identificar o estado?",
+        visual: { type: "particles_anim", state: "gasoso" },
+        answer: "gasoso",
+        hint: "As partículas estão muito espalhadas e se movem rapidamente em todas as direções.",
+        feedback: "Perfeito! Partículas muito afastadas e em movimento rápido e desordenado — estado GASOSO! Sem forma nem volume fixo.",
+        wrongFeedback: "Errado! As partículas estão muito espalhadas e se movem em alta velocidade sem direção definida. Qual estado não tem nem forma nem volume próprios?"
+      },
+      {
+        name: "Pote D — Desafio!",
+        dialog: "Este pote tem substância com partículas em alta energia cinética. Qual estado físico tem MAIOR energia cinética das partículas?",
+        visual: { type: "particles_anim", state: "gasoso" },
+        answer: "gasoso",
+        hint: "Quanto maior a energia cinética, mais as partículas se movem e mais afastadas ficam.",
+        feedback: "Isso mesmo! O estado GASOSO tem a maior energia cinética — partículas se movem rapidamente e ficam muito afastadas.",
+        wrongFeedback: "Não! Alta energia cinética = partículas muito agitadas e afastadas. Em qual estado as partículas se movem com mais liberdade e velocidade?"
+      },
+      {
+        name: "Pote E — Análise Submicroscópica",
+        dialog: "Aqui vemos partículas com baixíssima energia cinética, dispostas em padrão regular. Qual estado é esse?",
+        visual: { type: "particles_anim", state: "solido" },
+        answer: "solido",
+        hint: "Baixa energia cinética + organização regular = as partículas mal se movem.",
+        feedback: "Excelente! Baixa energia cinética e organização regular são marcas do estado SÓLIDO. O retículo cristalino!",
+        wrongFeedback: "Não! Baixíssima energia cinética + padrão regular de organização. Qual estado tem as partículas praticamente imóveis e dispostas em ordem?"
+      },
+      {
+        name: "Pote F — Características",
+        dialog: "Substância que ocupa todo o recipiente, sem volume definido. As partículas têm alta mobilidade e estão muito afastadas. Qual estado?",
+        visual: { type: "particles_anim", state: "gasoso" },
+        answer: "gasoso",
+        hint: "Se ocupa todo o espaço disponível e não tem volume fixo...",
+        feedback: "Correto! O estado GASOSO não tem volume próprio — as partículas se expandem para ocupar todo o espaço disponível.",
+        wrongFeedback: "Errado! A chave é: sem volume próprio, ocupa qualquer recipiente completamente. Só um estado faz isso — partículas muito afastadas e livres."
+      }
+    ]
+  },
+  {
+    id: 2,
+    title: "FASE 2: O FOGÃO DAS TRANSFORMAÇÕES",
+    subtitle: "Mudanças de Estado e Energia",
+    context: "🔥 No fogão do restaurante, as substâncias estão passando por transformações! O Chef Mol precisa nomear cada mudança e entender a energia envolvida.",
+    cards: [
+      {
+        emoji: "🔄",
+        title: "AS 6 MUDANÇAS DE ESTADO",
+        body: `A matéria pode mudar de estado ao ganhar ou perder <span class="hl">energia térmica</span>. São 6 transformações: <span class="hl-red">Fusão</span> (sólido→líquido), <span class="hl-blue">Solidificação</span> (líquido→sólido), <span class="hl-green">Vaporização</span> (líquido→gás), <span class="hl-blue">Condensação</span> (gás→líquido), <span class="hl-yellow">Sublimação</span> (sólido→gás) e <span class="hl-yellow">Deposição</span> (gás→sólido).`
+      },
+      {
+        emoji: "🔥",
+        title: "GANHANDO ENERGIA — AQUECIMENTO",
+        body: `Quando a matéria <span class="hl-red">GANHA energia</span> (absorve calor), as partículas ficam mais agitadas e afastadas, causando: <span class="hl-red">Fusão</span> (gelo → água), <span class="hl-red">Vaporização</span> (água → vapor) e <span class="hl-red">Sublimação</span> (naftalina → gás). A substância <span class="hl">retira energia térmica</span> do ambiente imediato ao seu redor.`
+      },
+      {
+        emoji: "❄️",
+        title: "PERDENDO ENERGIA — RESFRIAMENTO",
+        body: `Quando a matéria <span class="hl-blue">PERDE energia</span> (libera calor), as partículas ficam mais lentas e próximas, causando: <span class="hl-blue">Solidificação</span> (água → gelo), <span class="hl-blue">Condensação</span> (vapor → água) e <span class="hl-blue">Deposição</span> (gás → sólido). A substância <span class="hl">cede energia térmica</span> para o ambiente imediato ao seu redor.`
+      },
+      {
+        emoji: "💡",
+        title: "DICA DO CHEF MOL",
+        body: `<span class="hl-yellow">Macete:</span> Transformações que sobem no diagrama de estados (sólido→líquido→gás) <span class="hl-red">absorvem calor</span>. Transformações que descem (gás→líquido→sólido) <span class="hl-blue">liberam calor</span>. Pense: subir = precisa de energia, descer = libera energia!`
+      }
+    ],
+    mechanic: "classify_transform",
+    options: [
+      { label: "🔥 Fusão", value: "fusao" },
+      { label: "❄️ Solidificação", value: "solidificacao" },
+      { label: "♨️ Vaporização", value: "vaporizacao" },
+      { label: "💧 Condensação", value: "condensacao" },
+      { label: "✨ Sublimação", value: "sublimacao" },
+      { label: "🌨️ Deposição", value: "deposicao" }
+    ],
+    questions: [
+      {
+        name: "Cena 1: O Gelo no Copo",
+        dialog: "O gelo que estava no copo de suco virou água líquida. O que aconteceu com as partículas? Qual transformação ocorreu?",
+        visual: { type: "scene", emoji: "🧊➡️💧", label: "Gelo → Água líquida" },
+        submicro: "As partículas do gelo ganharam energia, quebraram a organização rígida e passaram a se mover livremente.",
+        answer: "fusao",
+        hint: "Sólido virou líquido. A substância absorveu ou liberou calor?",
+        feedback: "FUSÃO! Sólido → Líquido. As partículas absorveram energia térmica, rompendo a estrutura rígida e ganhando mobilidade.",
+        wrongFeedback: "Não é essa! O gelo (sólido) virou água (líquido). Qual das transformações descreve exatamente sólido → líquido?"
+      },
+      {
+        name: "Cena 2: Vapor da Panela",
+        dialog: "A água da panela está subindo como vapor. No nível submicroscópico, o que acontece com as partículas d'água durante esse processo?",
+        visual: { type: "scene", emoji: "💧➡️💨", label: "Água → Vapor d'água" },
+        submicro: "As partículas líquidas receberam energia suficiente para vencer as forças de atração entre si e se separar completamente.",
+        answer: "vaporizacao",
+        hint: "Líquido virando gás. As partículas ganharam energia suficiente para se separar completamente.",
+        feedback: "VAPORIZAÇÃO! Líquido → Gás. As partículas absorveram muita energia, vencendo as forças de atração entre elas e se espalhando.",
+        wrongFeedback: "Errado! A água (líquido) está virando vapor (gás). Qual transformação é sempre líquido → gás?"
+      },
+      {
+        name: "Cena 3: O Espelho do Banheiro",
+        dialog: "Após o banho quente, o espelho ficou embaçado com gotinhas d'água. O vapor do ar se transformou em água líquida. Que transformação é essa?",
+        visual: { type: "scene", emoji: "💨➡️💧", label: "Vapor → Gotículas de água" },
+        submicro: "As partículas de vapor perderam energia ao tocar o espelho frio, desaceleraram e se aproximaram formando o líquido.",
+        answer: "condensacao",
+        hint: "Gás virando líquido. As partículas do vapor perderam energia ao tocar a superfície fria.",
+        feedback: "CONDENSAÇÃO! Gás → Líquido. As partículas perderam energia, desaceleraram e as forças de atração as aproximaram formando gotículas.",
+        wrongFeedback: "Não! O vapor (gás) está se tornando gotículas de água (líquido) ao tocar o espelho frio. Qual transformação é gás → líquido?"
+      },
+      {
+        name: "Cena 4: Fabricando Sorvete",
+        dialog: "Para fazer sorvete, a mistura líquida é resfriada e se torna sólida. Com base no modelo submicroscópico, explique: as partículas ganham ou perdem energia? Qual transformação ocorre?",
+        visual: { type: "scene", emoji: "💧➡️🧊", label: "Mistura líquida → Sorvete sólido" },
+        submicro: "As partículas perderam energia cinética, ficaram mais lentas e se organizaram em estrutura mais rígida.",
+        answer: "solidificacao",
+        hint: "Líquido virando sólido — as partículas perderam energia e se organizaram.",
+        feedback: "SOLIDIFICAÇÃO! Líquido → Sólido. As partículas perderam energia, ficaram mais lentas e se organizaram em estrutura rígida.",
+        wrongFeedback: "Errado! A mistura líquida está sendo resfriada e virando sólido (sorvete). Qual transformação é sempre líquido → sólido?"
+      },
+      {
+        name: "Cena 5: Naftalina Sumindo",
+        dialog: "As bolinhas de naftalina no armário foram diminuindo e desapareceram sem deixar líquido. Que fenômeno incrível é esse?",
+        visual: { type: "scene", emoji: "⚪➡️💨", label: "Naftalina sólida → Gás" },
+        submicro: "As partículas sólidas da naftalina ganharam energia diretamente do ambiente e escaparam para a fase gasosa, pulando a fase líquida.",
+        answer: "sublimacao",
+        hint: "Sólido virou gás DIRETAMENTE, sem passar pelo estado líquido.",
+        feedback: "SUBLIMAÇÃO! Sólido → Gás (sem passar pelo líquido). As partículas absorveram energia suficiente para se libertar diretamente da fase sólida.",
+        wrongFeedback: "Não é essa! O detalhe essencial: sólido → gás SEM deixar resíduo líquido. Qual transformação pula completamente o estado líquido?"
+      },
+      {
+        name: "Cena 6: Geada na Grama",
+        dialog: "Durante a madrugada fria, o vapor d'água do ar se transformou diretamente em cristais de gelo na grama. Que transformação é essa?",
+        visual: { type: "scene", emoji: "💨➡️🌨️", label: "Vapor → Cristais de gelo" },
+        submicro: "As partículas gasosas perderam energia para o ambiente frio e se organizaram diretamente em estrutura sólida cristalina.",
+        answer: "deposicao",
+        hint: "Gás virou sólido DIRETAMENTE. É o inverso da sublimação.",
+        feedback: "DEPOSIÇÃO! Gás → Sólido (sem passar pelo líquido). As partículas perderam muita energia e se organizaram em estrutura cristalina.",
+        wrongFeedback: "Errado! Vapor (gás) virou cristais de gelo (sólido) diretamente, sem passar por líquido. Qual transformação é gás → sólido direto?"
+      },
+      {
+        name: "Cena 7: Produção de Chumbo",
+        dialog: "Na metalurgia, o chumbo sólido é aquecido até virar líquido para ser moldado. Qual transformação ocorre e o que acontece com as partículas?",
+        visual: { type: "scene", emoji: "🪨➡️🫗", label: "Chumbo sólido → Chumbo líquido" },
+        submicro: "As partículas do chumbo absorveram energia térmica, a vibração aumentou até romper a estrutura rígida, ganhando mobilidade.",
+        answer: "fusao",
+        hint: "Sólido virando líquido por aquecimento — processo industrial comum.",
+        feedback: "FUSÃO! Sólido → Líquido. Na metalurgia, o aquecimento aumenta a energia das partículas até romper a estrutura rígida do metal.",
+        wrongFeedback: "Não! Chumbo sólido → chumbo líquido pelo calor. Qual transformação é sempre sólido → líquido, seja gelo, metal ou qualquer substância?"
+      },
+      {
+        name: "Cena 8: Chuva se Formando",
+        dialog: "Nas nuvens, o vapor d'água se resfria e forma gotículas que caem como chuva. Com base na energia das partículas, que processo é esse?",
+        visual: { type: "scene", emoji: "☁️➡️🌧️", label: "Vapor nas nuvens → Chuva" },
+        submicro: "As partículas de vapor perderam energia para o ar mais frio das camadas superiores da atmosfera, desaceleraram e as forças de atração as aproximaram formando gotículas líquidas.",
+        answer: "condensacao",
+        hint: "Vapor (gás) virando água líquida. As partículas perdem energia e se aproximam.",
+        feedback: "CONDENSAÇÃO! Gás → Líquido. Nas altitudes elevadas o ar é mais frio — as partículas de vapor perdem energia para esse ar frio, desaceleram e as forças intermoleculares as aproximam formando gotículas de chuva.",
+        wrongFeedback: "Errado! Vapor (gás) está virando gotículas de chuva (líquido) ao resfriar. Qual transformação é gás → líquido?"
+      },
+      {
+        hypothesis: true,
+        name: "Desafio Final: O Que Vai Acontecer?",
+        dialog: "O Chef Mol colocou um copo com água líquida no freezer. ANTES de ver o resultado, qual transformação você PREVÊ que vai ocorrer e por quê?",
+        visual: { type: "scene", emoji: "💧❄️❓", label: "Água no freezer — O que vai acontecer?" },
+        answer: "solidificacao",
+        options: [
+          { label: "❄️ Solidificação — a água vai virar gelo", value: "solidificacao" },
+          { label: "💨 Vaporização — a água vai virar vapor", value: "vaporizacao" },
+          { label: "✨ Sublimação — a água vai virar gás direto", value: "sublimacao" },
+          { label: "🔥 Fusão — o gelo já existente vai derreter", value: "fusao" }
+        ],
+        hint: "No freezer, a substância perde ou ganha calor? O que acontece com as partículas?",
+        feedback: "SOLIDIFICAÇÃO! Você previu corretamente! No freezer, a água PERDE energia para o ambiente frio, as partículas ficam mais lentas e se organizam em estrutura rígida — o gelo!",
+        wrongFeedback: "Pense de novo! No freezer o ambiente é muito frio. A água líquida perde ou ganha energia? Quando um líquido perde muita energia, qual transformação ocorre?"
+      }
+    ]
+  },
+  {
+    id: 3,
+    title: "FASE 3: O PAINEL DE CONTROLE TÉRMICO",
+    subtitle: "Interpretando Gráficos",
+    context: "📊 O painel de controle do restaurante monitora as temperaturas. O Chef Mol precisa interpretar os gráficos de aquecimento e resfriamento para controlar as transformações.",
+    cards: [
+      {
+        emoji: "📈",
+        title: "COMO LER UM GRÁFICO TÉRMICO",
+        body: `Num gráfico de <span class="hl">temperatura × tempo</span>, a linha mostra como a temperatura muda enquanto aquecemos ou resfriamos uma substância. Os trechos <span class="hl-red">inclinados</span> indicam mudança de temperatura. Os trechos <span class="hl-blue">horizontais (platôs)</span> indicam mudança de estado!`
+      },
+      {
+        emoji: "🌡️",
+        title: "O QUE SÃO OS PLATÔS?",
+        body: `Durante uma <span class="hl">mudança de estado</span>, a temperatura <span class="hl-yellow">não muda</span>! Toda a energia fornecida é usada para romper (ou formar) as forças entre as partículas — não para aumentar a temperatura. Por isso o gráfico fica <span class="hl-blue">horizontal</span> durante a fusão ou vaporização.`
+      },
+      {
+        emoji: "🔬",
+        title: "O MODELO SUBMICROSCÓPICO NO GRÁFICO",
+        body: `Nos trechos inclinados: as partículas <span class="hl-red">aceleram</span> (no aquecimento) ou <span class="hl-blue">desaceleram</span> (no resfriamento). Nos platôs: a energia vai para <span class="hl-yellow">reorganizar as partículas</span> — rompendo ou formando <strong>interações intermoleculares</strong> (forças entre as partículas) — sem aumentar a velocidade média delas.`
+      },
+      {
+        emoji: "💡",
+        title: "DICA DO CHEF MOL",
+        body: `<span class="hl-yellow">Atenção:</span> Uma substância pura tem pontos de fusão e ebulição <span class="hl">bem definidos</span> — platôs na temperatura certa. Uma <span class="hl">mistura</span> não tem platô definido e muda de estado numa faixa de temperatura. Isso é útil para identificar substâncias!`
+      }
+    ],
+    mechanic: "graph_reading",
+    questions: [
+      {
+        name: "Análise do Gráfico A",
+        dialog: "Observe o gráfico de aquecimento desta substância. No trecho HORIZONTAL (platô), o que está acontecendo com as partículas?",
+        visual: { type: "graph", graphType: "heating_plateau", highlightSegment: "plateau1" },
+        answer: "reorganizando",
+        options: [
+          { label: "As partículas estão acelerando", value: "acelerando" },
+          { label: "As partículas estão se reorganizando (mudança de estado)", value: "reorganizando" },
+          { label: "A substância está resfriando", value: "resfriando" },
+          { label: "Não há energia sendo fornecida", value: "sem_energia" }
+        ],
+        hint: "No platô, a temperatura não muda. Para onde está indo a energia fornecida então?",
+        feedback: "Exato! No platô, a energia vai para REORGANIZAR as partículas (mudar o estado), não para aumentar a temperatura. A velocidade média das partículas não aumenta!",
+        wrongFeedback: "Não! No platô a temperatura está constante — energia está sendo fornecida, mas não aumenta a velocidade das partículas. O que ela está fazendo então?"
+      },
+      {
+        name: "Análise do Gráfico B",
+        dialog: "Neste gráfico de aquecimento, qual trecho representa a FUSÃO (passagem do estado sólido para o líquido)?",
+        visual: { type: "graph", graphType: "heating_full", highlightSegment: "fusion" },
+        answer: "plateau1",
+        options: [
+          { label: "Trecho A — temperatura subindo no início", value: "trecho_a" },
+          { label: "Trecho B — primeiro platô horizontal", value: "plateau1" },
+          { label: "Trecho C — temperatura subindo no meio", value: "trecho_c" },
+          { label: "Trecho D — segundo platô horizontal", value: "plateau2" }
+        ],
+        hint: "Fusão é sólido → líquido. Em qual trecho a temperatura para de subir pela primeira vez?",
+        feedback: "Correto! O primeiro platô (Trecho B) representa a FUSÃO. A temperatura fica constante enquanto todas as partículas ganham energia suficiente para romper a estrutura sólida.",
+        wrongFeedback: "Errado! Fusão ocorre quando a temperatura PARA DE SUBIR pela primeira vez. Procure o primeiro trecho completamente horizontal no gráfico."
+      },
+      {
+        name: "Análise do Gráfico C",
+        dialog: "Durante o segundo platô deste gráfico, que transformação está ocorrendo? E o que acontece com a energia fornecida?",
+        visual: { type: "graph", graphType: "heating_full", highlightSegment: "vapor" },
+        answer: "vaporizacao_energia",
+        options: [
+          { label: "Fusão — energia usada para romper estrutura sólida", value: "fusao_energia" },
+          { label: "Vaporização — energia usada para separar partículas do líquido", value: "vaporizacao_energia" },
+          { label: "Condensação — energia sendo liberada", value: "condensacao_energia" },
+          { label: "Solidificação — partículas se organizando", value: "solidificacao_energia" }
+        ],
+        hint: "O segundo platô, em temperatura mais alta, é quando o líquido vira gás.",
+        feedback: "Correto! O segundo platô é a VAPORIZAÇÃO! A energia fornecida é usada para separar as partículas do líquido, vencendo as forças de atração entre elas.",
+        wrongFeedback: "Não! O segundo platô ocorre numa temperatura mais alta que o primeiro. A substância já é líquida nesse ponto — o que acontece quando se aquece um líquido até ele entrar em ebulição?"
+      },
+      {
+        name: "Análise do Gráfico D — Resfriamento",
+        dialog: "Agora temos um gráfico de RESFRIAMENTO de uma substância que começa no estado líquido e é resfriada até o estado sólido. Qual transformação ocorre no platô deste gráfico?",
+        visual: { type: "graph", graphType: "cooling", highlightSegment: "plateau_cool" },
+        answer: "solidificacao_resf",
+        options: [
+          { label: "Vaporização — líquido virando gás", value: "vaporizacao_resf" },
+          { label: "Fusão — sólido virando líquido", value: "fusao_resf" },
+          { label: "Solidificação — líquido virando sólido", value: "solidificacao_resf" },
+          { label: "Sublimação — sólido virando gás", value: "sublimacao_resf" }
+        ],
+        hint: "No resfriamento partindo do estado líquido, a substância PERDE energia. Um platô aqui significa que as partículas estão se reorganizando em estrutura rígida.",
+        feedback: "Isso! Partindo do estado líquido no resfriamento, o platô indica SOLIDIFICAÇÃO — líquido → sólido. As partículas perdem energia cinética e as interações intermoleculares as organizam em estrutura rígida.",
+        wrongFeedback: "Errado! A curva desce (resfriamento) e temos um platô. A substância começa líquida e está perdendo energia. Qual transformação ocorre quando um líquido perde energia suficiente?"
+      },
+      {
+        hypothesis: true,
+        name: "Prevendo o Gráfico",
+        dialog: "Uma substância está sendo aquecida a partir do estado sólido. ANTES de ver o gráfico completo, qual é o SEGUNDO evento que você PREVÊ que vai acontecer?",
+        visual: { type: "graph", graphType: "partial_heating", highlightSegment: "partial" },
+        answer: "segundo_plato",
+        options: [
+          { label: "A temperatura vai subir continuamente sem parar", value: "sobe_continuo" },
+          { label: "Vai ocorrer um segundo platô (vaporização)", value: "segundo_plato" },
+          { label: "A substância vai resfriar sozinha", value: "resfria" },
+          { label: "O gráfico vai ficar completamente horizontal", value: "horizontal_total" }
+        ],
+        hint: "Após a fusão (1º platô), a substância vira líquido. O que acontece quando o líquido é aquecido mais ainda?",
+        feedback: "Você previu corretamente! Após a fusão, o líquido aquece até a temperatura de ebulição, quando ocorre a VAPORIZAÇÃO — o segundo platô. Excelente raciocínio científico!",
+        wrongFeedback: "Pense de novo! Após o 1º platô (fusão) a substância virou líquido. Continuando a aquecer, ela vai atingir a temperatura de ebulição. O que acontece no gráfico nesse momento?"
+      },
+      {
+        name: "Análise do Gráfico F — Substância Pura vs Mistura",
+        dialog: "Comparando dois gráficos: um tem platô bem definido, outro não tem platô claro. Qual pertence a uma SUBSTÂNCIA PURA?",
+        visual: { type: "graph", graphType: "pure_vs_mix", highlightSegment: "comparison" },
+        answer: "plato_definido",
+        options: [
+          { label: "O gráfico COM platô bem definido", value: "plato_definido" },
+          { label: "O gráfico SEM platô definido (faixa de temperatura)", value: "sem_plato" },
+          { label: "Os dois podem ser substâncias puras", value: "ambos" },
+          { label: "Nenhum dos dois é substância pura", value: "nenhum" }
+        ],
+        hint: "Substâncias puras têm ponto de fusão/ebulição fixo. Misturas mudam em faixa de temperatura.",
+        feedback: "Correto! Substâncias puras têm platôs bem definidos em temperaturas exatas. Misturas não têm platô — a mudança ocorre gradualmente numa faixa de temperatura.",
+        wrongFeedback: "Errado! Substâncias puras têm temperatura de fusão e ebulição exata e fixa — isso aparece como um platô bem definido. Misturas não têm temperatura fixa de mudança de estado."
+      }
+    ]
+  },
+  {
+    id: 4,
+    title: "FASE 4: O SERVIÇO — MESA A MESA",
+    subtitle: "Cotidiano e Indústria",
+    context: "🍽️ O restaurante abriu! Clientes chegam com situações do cotidiano e da indústria. O Chef Mol precisa da sua ajuda para responder corretamente sobre transformações de estado e energia.",
+    cards: [
+      {
+        emoji: "🏭",
+        title: "MUDANÇAS DE ESTADO NA INDÚSTRIA",
+        body: `A indústria usa transformações de estado o tempo todo: <span class="hl">Destilação do petróleo</span> (vaporização + condensação), <span class="hl-blue">Produção de aço</span> (fusão), <span class="hl-green">Gelo seco</span> (CO₂ comprimido sofre deposição para formar o sólido; em uso, sofre <strong>sublimação</strong> — sólido→gás), <span class="hl-yellow">Liofilização</span> (sublimação para conservar alimentos), <span class="hl-red">Usinas termelétricas</span> (vaporização d'água para mover turbinas).`
+      },
+      {
+        emoji: "🏠",
+        title: "MUDANÇAS DE ESTADO NO COTIDIANO",
+        body: `No dia a dia: <span class="hl">Geladeira</span> usa vaporização e condensação de gás refrigerante, <span class="hl-blue">Chuva</span> é condensação do vapor atmosférico, <span class="hl-green">Ferro de roupa a vapor</span> produz vaporização, <span class="hl-yellow">Secagem de roupas</span> usa vaporização, <span class="hl-red">Orvalho</span> é condensação noturna.`
+      },
+      {
+        emoji: "⚡",
+        title: "ENERGIA E MUDANÇAS DE ESTADO",
+        body: `Toda mudança de estado envolve <span class="hl">troca de energia</span> com o ambiente. Quando a substância <span class="hl-red">absorve calor</span>, o ambiente fica mais frio. Quando a substância <span class="hl-blue">libera calor</span>, o ambiente fica mais quente. É por isso que o suor resfria o corpo — a vaporização <span class="hl">absorve calor</span> da sua pele!`
+      },
+      {
+        emoji: "💡",
+        title: "DICA DO CHEF MOL",
+        body: `<span class="hl-yellow">Raciocínio essencial:</span> Para resolver qualquer problema, pergunte: <span class="hl">(1)</span> Qual era o estado inicial? <span class="hl">(2)</span> Qual é o estado final? <span class="hl">(3)</span> A substância aqueceu ou esfriou? <span class="hl">(4)</span> Esse processo absorveu ou liberou calor do ambiente? Com essas respostas, você identifica qualquer transformação!`
+      }
+    ],
+    mechanic: "context_problem",
+    questions: [
+      {
+        name: "Mesa 1: O Suor Refrescante",
+        dialog: "Um cliente pergunta: 'Por que suar refresca o corpo?' O suor (líquido) evapora na pele. Que transformação é essa e o que ela faz com o calor do seu corpo?",
+        visual: { type: "scene", emoji: "💦➡️💨🌡️⬇️", label: "Suor evaporando → resfriamento" },
+        answer: "vapor_absorve",
+        options: [
+          { label: "Vaporização — absorve calor da pele, resfriando-a", value: "vapor_absorve" },
+          { label: "Condensação — libera calor para a pele, aquecendo-a", value: "cond_libera" },
+          { label: "Vaporização — libera calor para o ambiente", value: "vapor_libera" },
+          { label: "Sublimação — absorve calor sem passar pelo gás", value: "sub_absorve" }
+        ],
+        hint: "O suor vai de líquido para gás (vaporização). Esse processo absorve ou libera calor?",
+        feedback: "Exato! A VAPORIZAÇÃO do suor ABSORVE calor da sua pele — por isso você sente frescor. A energia térmica da pele é usada para separar as partículas do líquido.",
+        wrongFeedback: "Errado! O suor (líquido) está evaporando (virando gás). Vaporização absorve ou libera calor? O que isso faz com a temperatura da sua pele?"
+      },
+      {
+        name: "Mesa 2: O Gelo Seco",
+        dialog: "Na cozinha molecular, o Chef usa gelo seco (CO₂ sólido) que vai diretamente para o estado gasoso sem deixar resíduo líquido. Qual transformação é essa e a substância ganha ou perde calor do ambiente?",
+        visual: { type: "scene", emoji: "🧊💨✨", label: "CO₂ sólido → CO₂ gasoso" },
+        answer: "sub_absorve_amb",
+        options: [
+          { label: "Sublimação — absorve calor do ambiente (ambiente esfria)", value: "sub_absorve_amb" },
+          { label: "Sublimação — libera calor para o ambiente (ambiente aquece)", value: "sub_libera_amb" },
+          { label: "Deposição — absorve calor do ambiente", value: "dep_absorve" },
+          { label: "Fusão — a substância derrete primeiro", value: "fusao_errada" }
+        ],
+        hint: "Sólido → Gás diretamente = sublimação. Para isso, a substância precisa ganhar ou perder energia?",
+        feedback: "Correto! SUBLIMAÇÃO — sólido → gás diretamente. O CO₂ ABSORVE calor do ambiente para ganhar energia e se transformar em gás. Por isso o gelo seco resfria os alimentos ao redor!",
+        wrongFeedback: "Não! Sólido → gás direto = sublimação. Pense: para uma substância mudar de estado indo de sólido para gás, ela precisa ganhar ou perder energia do ambiente?"
+      },
+      {
+        name: "Mesa 3: A Geladeira",
+        dialog: "A geladeira funciona fazendo um gás refrigerante vaporizar dentro do compartimento de alimentos e condensar fora. Isso resfria os alimentos porque...",
+        visual: { type: "scene", emoji: "🚿➡️💨➡️❄️", label: "Ciclo da geladeira" },
+        answer: "vapor_interno_absorve",
+        options: [
+          { label: "A vaporização interna absorve calor dos alimentos, resfriando-os", value: "vapor_interno_absorve" },
+          { label: "A condensação interna libera calor nos alimentos", value: "cond_interna_libera" },
+          { label: "O gás resfriado é soprado sobre os alimentos", value: "gas_soprado" },
+          { label: "A solidificação do gás retira calor dos alimentos", value: "solid_retira" }
+        ],
+        hint: "Dentro da geladeira, o gás vaporiza. Esse processo absorve ou libera calor?",
+        feedback: "Perfeito! A VAPORIZAÇÃO do gás refrigerante dentro da geladeira ABSORVE calor dos alimentos, resfriando-os. Na parte de fora, a CONDENSAÇÃO libera esse calor — por isso o motor aquece!",
+        wrongFeedback: "Errado! Dentro da geladeira o gás refrigerante está vaporizando (líquido→gás). Vaporização absorve ou libera calor? O que acontece com os alimentos ao redor?"
+      },
+      {
+        name: "Mesa 4: Destilação do Petróleo",
+        dialog: "Na refinaria, o petróleo é aquecido até virar vapor, depois os vapores são resfriados em diferentes temperaturas para obter combustíveis. Quais são as DUAS transformações, em ordem?",
+        visual: { type: "scene", emoji: "🛢️🔥➡️💨➡️⛽", label: "Petróleo → Vapor → Combustível" },
+        answer: "vapor_depois_cond",
+        options: [
+          { label: "Fusão → depois Solidificação", value: "fusao_solid" },
+          { label: "Vaporização → depois Condensação", value: "vapor_depois_cond" },
+          { label: "Sublimação → depois Deposição", value: "sub_dep" },
+          { label: "Condensação → depois Vaporização", value: "cond_vapor" }
+        ],
+        hint: "Aquecimento transforma líquido em gás. Depois o resfriamento transforma gás em líquido novamente.",
+        feedback: "Correto! VAPORIZAÇÃO (petróleo líquido → vapor) seguida de CONDENSAÇÃO (vapor → combustíveis líquidos). Cada combustível condensa numa temperatura diferente — por isso a destilação separa os componentes!",
+        wrongFeedback: "Não! Pense na sequência: o petróleo é aquecido (líquido vira gás = ?) e depois os vapores são resfriados (gás vira líquido = ?). Qual par de transformações descreve isso?"
+      },
+      {
+        name: "Mesa 5: Liofilização de Alimentos",
+        dialog: "O café solúvel é produzido por liofilização: o café congelado (-50°C) passa diretamente para vapor sem derreter, conservando sabor e aroma. Qual transformação ocorre e como a energia está envolvida?",
+        visual: { type: "scene", emoji: "☕❄️➡️💨", label: "Café congelado → Pó seco (liofilizado)" },
+        answer: "sub_liofiliz",
+        options: [
+          { label: "Sublimação — sólido → gás, absorvendo energia", value: "sub_liofiliz" },
+          { label: "Vaporização — líquido → gás, absorvendo energia", value: "vapor_liofiliz" },
+          { label: "Deposição — gás → sólido, liberando energia", value: "dep_liofiliz" },
+          { label: "Fusão seguida de vaporização", value: "fusao_vapor_liofiliz" }
+        ],
+        hint: "O alimento está congelado (sólido) e vai diretamente para vapor. Sem passar pelo estado líquido.",
+        feedback: "Exato! SUBLIMAÇÃO! A água congelada absorve energia e vai diretamente para o estado gasoso, preservando a estrutura do alimento. Tecnologia usada no café solúvel, frutas desidratadas e até alimentos de astronautas!",
+        wrongFeedback: "Não! O café está congelado (sólido) e vai direto para vapor (gás), sem derreter. Qual transformação vai de sólido para gás diretamente? E ela absorve ou libera energia?"
+      },
+      {
+        name: "Mesa 6: Orvalho na Madrugada",
+        dialog: "De manhã cedo, as folhas das plantas estão cobertas de gotículas de água, mesmo sem ter chovido. O vapor d'água do ar transformou-se em líquido na superfície fria das folhas. Que transformação é essa?",
+        visual: { type: "scene", emoji: "🌫️➡️💧🌿", label: "Vapor do ar → Gotículas nas folhas" },
+        answer: "cond_orvalho",
+        options: [
+          { label: "Condensação — vapor → líquido, liberando calor para as folhas", value: "cond_orvalho" },
+          { label: "Deposição — vapor → sólido direto", value: "dep_orvalho" },
+          { label: "Vaporização — água das folhas evaporando", value: "vapor_orvalho" },
+          { label: "Fusão — gelo das folhas derretendo", value: "fusao_orvalho" }
+        ],
+        hint: "Vapor (gás) virando gotículas (líquido). As partículas perdem energia ao tocar as folhas frias.",
+        feedback: "Correto! CONDENSAÇÃO! O vapor d'água PERDE energia ao tocar a superfície fria das folhas, as partículas desaceleram e as forças de atração as aproximam formando o líquido.",
+        wrongFeedback: "Errado! O vapor (gás) virou gotículas de água (líquido) nas folhas frias. Qual transformação é gás → líquido? E ela libera ou absorve calor?"
+      },
+      {
+        name: "Mesa 7: Usina Hidrelétrica a Vapor",
+        dialog: "Usinas termelétricas aquecem água para virar vapor que move turbinas. Depois o vapor é resfriado e volta ao estado líquido. Quanto à energia: o vapor que se condensa libera ou absorve calor?",
+        visual: { type: "scene", emoji: "💧🔥➡️💨⚙️➡️💧", label: "Água → Vapor → Energia → Água" },
+        answer: "cond_libera_usi",
+        options: [
+          { label: "A condensação libera calor para o ambiente", value: "cond_libera_usi" },
+          { label: "A condensação absorve calor do ambiente", value: "cond_absorve_usi" },
+          { label: "A vaporização libera calor para mover as turbinas", value: "vapor_libera_usi" },
+          { label: "Nenhuma troca de energia ocorre na condensação", value: "sem_troca_usi" }
+        ],
+        hint: "Gás → líquido (condensação). As partículas se aproximam — elas liberam ou absorvem energia nesse processo?",
+        feedback: "Exato! A CONDENSAÇÃO LIBERA calor para o ambiente — por isso as torres de resfriamento das usinas ficam quentes. Quando as partículas se aproximam e formam as interações intermoleculares do estado líquido, liberam energia potencial intermolecular para o ambiente na forma de calor.",
+        wrongFeedback: "Não! Na condensação (gás → líquido), as partículas se aproximam e formam interações entre si. Quando partículas se aproximam formando ligações/interações, elas liberam ou absorvem energia?"
+      },
+      {
+        name: "Mesa 8 — Hipótese! O Problema do Chef",
+        hypothesis: true,
+        name: "Mesa 8: O Desafio do Chef Mol",
+        dialog: "O Chef Mol colocou um prato de comida quente para esfriar. PREVEJA: se a temperatura ambiente está fria, o vapor acima do prato vai se transformar em... e esse processo vai aquecer ou resfriar o ar ao redor?",
+        visual: { type: "scene", emoji: "🍽️🌡️❓", label: "Prato quente esfriando..." },
+        answer: "cond_aquece_ar",
+        options: [
+          { label: "Condensação — e o ar ao redor aquece (a condensação libera calor)", value: "cond_aquece_ar" },
+          { label: "Condensação — e o ar ao redor esfria (a condensação absorve calor)", value: "cond_esfria_ar" },
+          { label: "Vaporização — e o ar ao redor esfria (a vaporização absorve calor)", value: "vapor_esfria_ar" },
+          { label: "Deposição — o vapor vira sólido diretamente", value: "dep_prev" }
+        ],
+        hint: "Vapor esfriando → gás → líquido = condensação. Condensação libera ou absorve calor?",
+        feedback: "Você previu perfeitamente! CONDENSAÇÃO — o vapor esfria e vira gotículas líquidas. Como a condensação LIBERA calor, o ar ao redor fica levemente mais aquecido. Por isso soprar em cima da comida quente ajuda a resfriar!",
+        wrongFeedback: "Pense de novo! O vapor (gás) está esfriando e virando gotículas (líquido) = condensação. E quando partículas de gás se aproximam formando o líquido, elas liberam ou absorvem calor para o ar ao redor?"
+      },
+      {
+        name: "Mesa 9: Questão Final — Energia e Cotidiano",
+        dialog: "Uma panela de pressão retém o vapor que normalmente escaparia. Isso faz a temperatura interna superar os 100°C. Por que reter o vapor aumenta a temperatura?",
+        visual: { type: "scene", emoji: "🫕🔒💨⬆️🌡️", label: "Panela de pressão — por que fica mais quente?" },
+        answer: "pressao_vapor",
+        options: [
+          { label: "Com maior pressão, as partículas precisam de mais energia para vaporizar, elevando a temperatura de ebulição", value: "pressao_vapor" },
+          { label: "O vapor retido aquece a comida por contato direto", value: "vapor_contato" },
+          { label: "A tampa impede a perda de calor por convecção", value: "conveccao" },
+          { label: "A pressão comprime as partículas, gerando calor por atrito", value: "atrito" }
+        ],
+        hint: "Com mais pressão sobre o líquido, as partículas precisam de mais energia para escapar para o estado gasoso.",
+        feedback: "Perfeito! Com maior pressão, as moléculas precisam de MAIS energia para vencer as forças de atração e se tornar gás — logo a vaporização ocorre em temperatura mais alta. Por isso a panela de pressão cozinha mais rápido!",
+        wrongFeedback: "Não! Pense no que a pressão faz com as partículas do líquido: ela dificulta ou facilita a saída para o estado gasoso? Se dificulta, as partículas precisam de mais ou menos energia para vaporizar?"
+      }
+    ]
+  }
+];
+
+// ===== STATE =====
+const state = {
+  playerName: '',
+  currentPhase: 0,
+  currentCard: 0,
+  currentQuestion: 0,
+  totalPoints: 0,
+  phasePoints: 0,
+  phaseFirstTry: 0,
+  totalFirstTry: 0,
+  hintsUsedPhase: 0,
+  gotWrong: false,
+  usedHint: false,
+  answered: false,
+  isTyping: false
+};
+
+// ===== AUDIO =====
+const AC = new (window.AudioContext || window.webkitAudioContext)();
+
+function playSound(type) {
+  try {
+    const o = AC.createOscillator();
+    const g = AC.createGain();
+    o.connect(g); g.connect(AC.destination);
+    const t = AC.currentTime;
+    if (type === 'correct') {
+      o.frequency.setValueAtTime(440, t);
+      o.frequency.setValueAtTime(550, t+0.08);
+      o.frequency.setValueAtTime(660, t+0.16);
+      g.gain.setValueAtTime(0.2, t); g.gain.exponentialRampToValueAtTime(0.001, t+0.4);
+      o.start(t); o.stop(t+0.4);
+    } else if (type === 'wrong') {
+      o.type = 'sawtooth';
+      o.frequency.setValueAtTime(300, t);
+      o.frequency.setValueAtTime(200, t+0.1);
+      g.gain.setValueAtTime(0.15, t); g.gain.exponentialRampToValueAtTime(0.001, t+0.3);
+      o.start(t); o.stop(t+0.3);
+    } else if (type === 'star') {
+      o.frequency.setValueAtTime(880, t);
+      o.frequency.setValueAtTime(1100, t+0.05);
+      g.gain.setValueAtTime(0.15, t); g.gain.exponentialRampToValueAtTime(0.001, t+0.3);
+      o.start(t); o.stop(t+0.3);
+    } else if (type === 'click') {
+      o.frequency.setValueAtTime(600, t);
+      g.gain.setValueAtTime(0.1, t); g.gain.exponentialRampToValueAtTime(0.001, t+0.1);
+      o.start(t); o.stop(t+0.1);
+    } else if (type === 'card') {
+      o.frequency.setValueAtTime(350, t);
+      g.gain.setValueAtTime(0.08, t); g.gain.exponentialRampToValueAtTime(0.001, t+0.15);
+      o.start(t); o.stop(t+0.15);
+    } else if (type === 'victory') {
+      [523, 659, 784, 1047].forEach((freq, i) => {
+        const ov = AC.createOscillator();
+        const gv = AC.createGain();
+        ov.connect(gv); gv.connect(AC.destination);
+        ov.frequency.setValueAtTime(freq, t+i*0.12);
+        gv.gain.setValueAtTime(0.15, t+i*0.12);
+        gv.gain.exponentialRampToValueAtTime(0.001, t+i*0.12+0.3);
+        ov.start(t+i*0.12); ov.stop(t+i*0.12+0.3);
+      });
+    }
+  } catch(e) {}
+}
+
+// ===== NAVIGATION =====
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const s = document.getElementById(id);
+  s.classList.add('active');
+  s.classList.add('fade-in');
+  setTimeout(() => s.classList.remove('fade-in'), 500);
+}
+
+function goToNameScreen() {
+  playSound('click');
+  document.getElementById('game-header').style.display = 'flex';
+  showScreen('screen-name');
+  const inp = document.getElementById('player-name-input');
+  inp.value = '';
+  document.getElementById('btn-confirm-name').disabled = true;
+
+  // Clone the input to remove all previously attached event listeners
+  const newInp = inp.cloneNode(true);
+  inp.parentNode.replaceChild(newInp, inp);
+
+  newInp.addEventListener('input', () => {
+    document.getElementById('btn-confirm-name').disabled = newInp.value.trim().length < 2;
+  });
+  newInp.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && newInp.value.trim().length >= 2) confirmName();
+  });
+  setTimeout(() => newInp.focus(), 100);
+}
+
+function confirmName() {
+  const name = (document.getElementById('player-name-input') || document.querySelector('.pixel-input')).value.trim();
+  if (name.length < 2) return;
+  state.playerName = name.toUpperCase();
+  playSound('click');
+  loadPhaseCards();
+}
+
+function restartGame() {
+  state.currentPhase = 0; state.currentCard = 0; state.currentQuestion = 0;
+  state.totalPoints = 0; state.phasePoints = 0; state.phaseFirstTry = 0;
+  state.totalFirstTry = 0; state.hintsUsedPhase = 0;
+  state.gotWrong = false; state.usedHint = false; state.answered = false;
+  document.getElementById('game-header').style.display = 'none';
+  showScreen('screen-start');
+}
+
+// ===== CARDS =====
+function loadPhaseCards() {
+  const phase = PHASES[state.currentPhase];
+  state.currentCard = 0;
+  state.phasePoints = 0; state.phaseFirstTry = 0; state.hintsUsedPhase = 0;
+  document.getElementById('cards-title').textContent = phase.title;
+
+  // Show phase context/narrative if available
+  let contextEl = document.getElementById('phase-context-banner');
+  if (!contextEl) {
+    contextEl = document.createElement('div');
+    contextEl.id = 'phase-context-banner';
+    contextEl.style.cssText = 'background:rgba(212,99,26,0.15);border:2px solid var(--orange);border-radius:12px;padding:10px 16px;font-size:12px;font-weight:700;color:var(--cream);text-align:center;line-height:1.7;max-width:680px;width:100%;margin:0 auto;';
+    const cardsScreen = document.getElementById('screen-cards');
+    const cardWrap = document.getElementById('card-display');
+    cardsScreen.insertBefore(contextEl, cardWrap);
+  }
+  contextEl.textContent = phase.context || '';
+  contextEl.style.display = phase.context ? 'block' : 'none';
+
+  setChefEmotion('chef-cards', 'happy');
+  updateHeader();
+  renderCard();
+  showScreen('screen-cards');
+}
+
+function renderCard() {
+  const phase = PHASES[state.currentPhase];
+  const card = phase.cards[state.currentCard];
+  playSound('card');
+
+  document.getElementById('card-emoji').textContent = card.emoji;
+  document.getElementById('card-title-text').textContent = card.title;
+  document.getElementById('card-body-text').innerHTML = card.body;
+
+  const extra = document.getElementById('card-visual-extra');
+  extra.innerHTML = '';
+  if (card.visual === 'particles') {
+    extra.innerHTML = `
+      <div class="particle-demo">
+        <div class="pstate">
+          <div class="pstate-box p-solid">
+            ${Array(16).fill('<div class="part"></div>').join('')}
+          </div>
+          <div class="pstate-label">SÓLIDO</div>
+        </div>
+        <div class="pstate">
+          <div class="pstate-box p-liquid">
+            ${Array(8).fill('<div class="part"></div>').join('')}
+          </div>
+          <div class="pstate-label">LÍQUIDO</div>
+        </div>
+        <div class="pstate">
+          <div class="pstate-box p-gas">
+            ${Array(6).fill('<div class="part"></div>').join('')}
+          </div>
+          <div class="pstate-label">GASOSO</div>
+        </div>
+      </div>`;
+  }
+
+  // Dots
+  const dots = document.getElementById('card-dots');
+  dots.innerHTML = '';
+  phase.cards.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'card-dot' + (i === state.currentCard ? ' active' : '');
+    d.onclick = () => { state.currentCard = i; renderCard(); };
+    dots.appendChild(d);
+  });
+
+  document.getElementById('card-prev').disabled = state.currentCard === 0;
+  const nextBtn = document.getElementById('card-next');
+  // Always reassign onclick cleanly — no inline handler in HTML
+  if (state.currentCard === phase.cards.length - 1) {
+    nextBtn.textContent = '🍳 IR PARA A COZINHA!';
+    nextBtn.onclick = startPhase;
+    nextBtn.style.background = 'linear-gradient(135deg, var(--green-dark), var(--green))';
+    nextBtn.style.color = '#fff';
+  } else {
+    nextBtn.textContent = 'PRÓXIMO ▶';
+    nextBtn.onclick = nextCard;
+    nextBtn.style.background = '';
+    nextBtn.style.color = '';
+  }
+}
+
+function prevCard() {
+  if (state.currentCard > 0) { state.currentCard--; renderCard(); }
+}
+function nextCard() {
+  const phase = PHASES[state.currentPhase];
+  if (state.currentCard < phase.cards.length - 1) { state.currentCard++; renderCard(); }
+}
+
+// ===== GAME =====
+function startPhase() {
+  playSound('click');
+  state.currentQuestion = 0;
+  loadQuestion();
+  showScreen('screen-game');
+}
+
+function loadQuestion() {
+  const phase = PHASES[state.currentPhase];
+  if (state.currentQuestion >= phase.questions.length) { showPhaseResult(); return; }
+
+  const q = phase.questions[state.currentQuestion];
+  state.gotWrong = false; state.usedHint = false; state.answered = false;
+  state.isTyping = false; // always reset typing state when loading a new question
+
+  document.getElementById('game-phase-label').textContent = `🍳 ${phase.title}`;
+  document.getElementById('game-item-name').textContent = q.name;
+  document.getElementById('game-q-counter').textContent = `Questão ${state.currentQuestion+1} de ${phase.questions.length}`;
+  document.getElementById('hint-text').style.display = 'none';
+  document.getElementById('hint-text').textContent = '';
+
+  const hypo = document.getElementById('hypothesis-banner');
+  hypo.style.display = q.hypothesis ? 'block' : 'none';
+
+  setChefEmotion('chef-game', '');
+  typeText('game-dialog-text', q.dialog);
+  renderVisual(q.visual);
+  renderAnswers(q);
+  updateProgressBar();
+  updateHeader();
+}
+
+function renderVisual(visual) {
+  const panel = document.getElementById('visual-content');
+  panel.innerHTML = '';
+
+  if (!visual) return;
+
+  if (visual.type === 'particles_anim') {
+    const colors = {
+      solido: ['#ef476f','#c0394f'],
+      liquido: ['#29adff','#118ab2','#4db8d8'],
+      gasoso: ['#06d6a0','#04a87e']
+    };
+    const c = colors[visual.state];
+    let html = `<div style="display:flex;gap:24px;align-items:center;justify-content:center;flex-wrap:wrap;padding-top:16px;">`;
+
+    // Left: particle box
+    html += `<div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+      <div style="color:rgba(77,184,216,0.6);font-size:9px;letter-spacing:1px;font-weight:800;">VISÃO SUBMICROSCÓPICA</div>
+      <div style="width:120px;height:110px;background:rgba(255,255,255,0.04);border:2px solid rgba(77,184,216,0.3);border-radius:10px;position:relative;overflow:hidden;">`;
+
+    if (visual.state === 'solido') {
+      for (let r=0;r<4;r++) for (let col=0;col<4;col++) {
+        html += `<div style="position:absolute;width:14px;height:14px;border-radius:3px;background:${c[col%2]};top:${10+r*24}px;left:${12+col*24}px;box-shadow:0 0 4px ${c[0]}80;"></div>`;
+      }
+    } else if (visual.state === 'liquido') {
+      const positions = [[8,35],[20,18],[34,42],[50,28],[64,50],[76,20],[90,38],[44,56],[70,62]];
+      positions.forEach((p,i) => {
+        html += `<div style="position:absolute;width:12px;height:12px;border-radius:50%;background:${c[i%c.length]};top:${p[1]}px;left:${p[0]}px;animation:liquidMove ${1.5+i*0.2}s infinite alternate;box-shadow:0 0 5px ${c[0]}60;"></div>`;
+      });
+    } else {
+      const gpositions = [[5,5],[55,15],[25,40],[85,8],[10,60],[70,55],[40,20],[90,40],[50,70]];
+      gpositions.forEach((p,i) => {
+        html += `<div style="position:absolute;width:10px;height:10px;border-radius:50%;background:${c[i%c.length]};top:${p[1]}px;left:${p[0]}px;animation:gasMove ${1.3+i*0.15}s infinite;box-shadow:0 0 6px ${c[0]}70;"></div>`;
+      });
+    }
+    html += `</div></div>`;
+
+    // Right: macro view
+    const macroEmoji = { solido: '🧊', liquido: '💧', gasoso: '💨' };
+    const macroLabel = { solido: 'Forma e volume fixos', liquido: 'Volume fixo, sem forma', gasoso: 'Sem forma nem volume' };
+    html += `<div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+      <div style="color:rgba(77,184,216,0.6);font-size:9px;letter-spacing:1px;font-weight:800;">ESCALA MACROSCÓPICA</div>
+      <div style="font-size:48px;filter:drop-shadow(0 0 10px rgba(255,255,255,0.3));">${macroEmoji[visual.state]}</div>
+      <div style="font-size:10px;color:#4db8d8;font-weight:700;text-align:center;">${macroLabel[visual.state]}</div>
+    </div>`;
+    html += `</div>`;
+    panel.innerHTML = html;
+  }
+
+  else if (visual.type === 'scene') {
+    panel.innerHTML = `
+      <div class="scene-display">
+        <div class="scene-emoji">${visual.emoji}</div>
+        <div class="scene-label">${visual.label}</div>
+      </div>`;
+  }
+
+  else if (visual.type === 'graph') {
+    const canvas = document.createElement('canvas');
+    canvas.width = 480; canvas.height = 200;
+    canvas.style.cssText = 'max-width:100%;border-radius:8px;';
+    panel.appendChild(canvas);
+    setTimeout(() => drawGraph(canvas, visual.graphType, visual.highlightSegment), 50);
+  }
+}
+
+function drawGraph(canvas, type, highlight) {
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0,0,W,H);
+
+  // Background
+  ctx.fillStyle = 'rgba(255,255,255,0.04)';
+  ctx.fillRect(0,0,W,H);
+
+  // Axes
+  const pad = { l:50, r:20, t:20, b:40 };
+  const gW = W - pad.l - pad.r;
+  const gH = H - pad.t - pad.b;
+
+  ctx.strokeStyle = 'rgba(77,184,216,0.5)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(pad.l, pad.t);
+  ctx.lineTo(pad.l, pad.t + gH);
+  ctx.lineTo(pad.l + gW, pad.t + gH);
+  ctx.stroke();
+
+  // Labels
+  ctx.fillStyle = '#4db8d8';
+  ctx.font = 'bold 11px Nunito, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('TEMPO', pad.l + gW/2, H - 5);
+  ctx.save();
+  ctx.translate(12, pad.t + gH/2);
+  ctx.rotate(-Math.PI/2);
+  ctx.fillText('TEMPERATURA', 0, 0);
+  ctx.restore();
+
+  const x = (frac) => pad.l + frac * gW;
+  const y = (frac) => pad.t + (1 - frac) * gH;
+
+  function drawCurve(points, color, width=3) {
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    points.forEach((p, i) => {
+      if (i===0) ctx.moveTo(x(p[0]), y(p[1]));
+      else ctx.lineTo(x(p[0]), y(p[1]));
+    });
+    ctx.stroke();
+  }
+
+  function addLabel(label, fx, fy, color='#ffd166') {
+    ctx.fillStyle = color;
+    ctx.font = 'bold 10px Nunito, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(label, x(fx), y(fy));
+  }
+
+  function highlightRegion(x1, x2, color='rgba(255,209,102,0.15)') {
+    ctx.fillStyle = color;
+    ctx.fillRect(x(x1), pad.t, (x2-x1)*gW, gH);
+  }
+
+  if (type === 'heating_plateau') {
+    if (highlight === 'plateau1') highlightRegion(0.3, 0.55, 'rgba(255,209,102,0.2)');
+    drawCurve([[0,0.1],[0.3,0.4],[0.55,0.4],[0.85,0.8],[1,0.9]], '#ffd166');
+    addLabel('PLATÔ', 0.42, 0.5);
+    addLabel('Fusão ocorre aqui!', 0.42, 0.56, '#ef476f');
+  }
+
+  else if (type === 'heating_full') {
+    if (highlight === 'fusion') highlightRegion(0.2, 0.38, 'rgba(239,71,111,0.2)');
+    if (highlight === 'vapor') highlightRegion(0.6, 0.8, 'rgba(6,214,160,0.2)');
+    drawCurve([[0,0.05],[0.2,0.3],[0.38,0.3],[0.55,0.55],[0.6,0.6],[0.8,0.6],[1,0.95]], '#ffd166');
+    addLabel('A', 0.1, 0.2);
+    addLabel('B', 0.29, 0.4, '#ef476f');
+    addLabel('C', 0.47, 0.65);
+    addLabel('D', 0.7, 0.7, '#06d6a0');
+    // Temperature reference lines
+    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(pad.l, y(0.3)); ctx.lineTo(x(0.38), y(0.3)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(pad.l, y(0.6)); ctx.lineTo(x(0.8), y(0.6)); ctx.stroke();
+    ctx.setLineDash([]);
+    addLabel('Tf', 0, 0.3, 'rgba(77,184,216,0.8)');
+    addLabel('Te', 0, 0.6, 'rgba(77,184,216,0.8)');
+  }
+
+  else if (type === 'cooling') {
+    if (highlight === 'plateau_cool') highlightRegion(0.3, 0.55, 'rgba(41,173,255,0.2)');
+    drawCurve([[0,0.9],[0.3,0.6],[0.55,0.6],[0.8,0.2],[1,0.1]], '#29adff');
+    addLabel('PLATÔ', 0.42, 0.7);
+    addLabel('Solidificação', 0.42, 0.76, '#29adff');
+    ctx.font = 'bold 11px Nunito';
+    ctx.fillStyle = '#fff'; ctx.textAlign = 'left';
+    ctx.fillText('RESFRIAMENTO', x(0.02), y(0.96));
+  }
+
+  else if (type === 'partial_heating') {
+    // Show only partial graph up to mid
+    drawCurve([[0,0.05],[0.2,0.3],[0.38,0.3],[0.55,0.55]], '#ffd166');
+    // Dotted continuation
+    ctx.strokeStyle = 'rgba(255,209,102,0.3)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6,4]);
+    ctx.beginPath(); ctx.moveTo(x(0.55), y(0.55)); ctx.lineTo(x(1), y(0.95)); ctx.stroke();
+    ctx.setLineDash([]);
+    addLabel('?', 0.75, 0.8, '#ef476f');
+    addLabel('B', 0.29, 0.4, '#ef476f');
+  }
+
+  else if (type === 'pure_vs_mix') {
+    // === BASED ON REFERENCE: água pura (black) vs água com sal (red) ===
+    // Pure water: sharp horizontal plateaus at Tf and Te
+    // Salt water: plateaus shift (lower Tf, higher Te) and are sloped — no sharp plateau
+
+    // Y-axis tick marks (relative: 0.2, 0.4, 0.6, 0.8 = temp levels 1,2,3,4)
+    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3,3]);
+    [0.25, 0.45, 0.65, 0.85].forEach(yv => {
+      ctx.beginPath(); ctx.moveTo(pad.l, y(yv)); ctx.lineTo(pad.l + gW, y(yv)); ctx.stroke();
+    });
+    ctx.setLineDash([]);
+
+    // Pure substance (black/yellow curve) — sharp plateaus
+    // Tf plateau at y=0.35, Te plateau at y=0.65
+    drawCurve([
+      [0,0.05],
+      [0.15,0.30],
+      [0.28,0.35],[0.42,0.35],   // 1st plateau: FUSION
+      [0.55,0.60],
+      [0.62,0.65],[0.78,0.65],   // 2nd plateau: VAPORIZATION
+      [0.92,0.90]
+    ], '#ffd166', 3);
+
+    // Mixture (red curve) — no sharp plateaus, shifted temperatures
+    // Fusion zone: lower temp (~0.22-0.27), gradual slope
+    // Vaporization zone: higher temp (~0.70-0.78), gradual slope
+    drawCurve([
+      [0,0.05],
+      [0.15,0.20],
+      [0.24,0.22],[0.38,0.28],   // "plateau" zone for fusion — SLOPED (no sharp plateau)
+      [0.50,0.55],
+      [0.62,0.68],[0.78,0.76],   // "plateau" zone for ebulition — SLOPED (no sharp plateau)
+      [0.92,0.90]
+    ], '#ef476f', 2.5);
+
+    // Labels
+    ctx.font = 'bold 9px Nunito, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#ffd166';
+    ctx.fillText('Substância Pura', x(0.01), y(0.97));
+    ctx.fillStyle = '#ef476f';
+    ctx.fillText('Mistura (com sal)', x(0.01), y(0.90));
+
+    // Annotation arrows/labels on plateaus
+    addLabel('Tf', 0.35, 0.42, '#ffd166');
+    addLabel('Te', 0.70, 0.72, '#ffd166');
+
+    // Show that salt lowers Tf and raises Te
+    addLabel('↓Tf', 0.31, 0.34, '#ef476f');
+    addLabel('↑Te', 0.70, 0.63, '#ef476f');
+
+    // Legend note
+    ctx.font = 'bold 8px Nunito, sans-serif';
+    ctx.fillStyle = 'rgba(77,184,216,0.7)';
+    ctx.textAlign = 'center';
+    ctx.fillText('Pura: platôs definidos  |  Mistura: sem platô definido', x(0.5), y(-0.04) + gH * 0.05);
+  }
+}
+
+function renderAnswers(q) {
+  const area = document.getElementById('answer-area');
+  area.innerHTML = '';
+
+  const phase = PHASES[state.currentPhase];
+  const options = q.options || phase.options;
+
+  const btnWrap = document.createElement('div');
+  btnWrap.style.cssText = 'display:flex;flex-wrap:wrap;gap:10px;justify-content:center;width:100%;';
+
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-answer';
+    btn.innerHTML = opt.label;
+    btn.dataset.value = opt.value;
+    btn.onclick = () => handleAnswer(opt.value, btn, q);
+    btnWrap.appendChild(btn);
+  });
+  area.appendChild(btnWrap);
+
+  // Hint button
+  const hintBtn = document.createElement('button');
+  hintBtn.className = 'btn btn-hint';
+  hintBtn.innerHTML = '👨‍🍳 Pedir Conselho ao Chef';
+  hintBtn.onclick = () => {
+    if (!state.usedHint) {
+      state.usedHint = true;
+      state.hintsUsedPhase++;
+      const ht = document.getElementById('hint-text');
+      ht.textContent = '💡 ' + q.hint;
+      ht.style.display = 'block';
+      hintBtn.disabled = true;
+      playSound('click');
+    }
+  };
+  area.appendChild(hintBtn);
+
+  // Show submicro info if available (phase 2)
+  if (q.submicro) {
+    const sub = document.createElement('div');
+    sub.style.cssText = 'font-size:11px;color:rgba(77,184,216,0.8);background:rgba(17,138,178,0.1);border:1px solid rgba(77,184,216,0.3);border-radius:8px;padding:8px 12px;text-align:center;font-weight:700;line-height:1.7;max-width:640px;width:100%;';
+    sub.innerHTML = `🔬 <strong>Nível Submicroscópico:</strong> ${q.submicro}`;
+    area.insertBefore(sub, hintBtn);
+  }
+}
+
+function handleAnswer(value, btnEl, q) {
+  if (state.answered) return;
+  const area = document.getElementById('answer-area');
+  const allBtns = area.querySelectorAll('.btn-answer');
+
+  if (value === q.answer) {
+    state.answered = true;
+    allBtns.forEach(b => b.disabled = true);
+    btnEl.classList.add('correct');
+    setChefEmotion('chef-game', 'happy');
+    playSound('correct');
+
+    // Points
+    let pts = 0;
+    if (!state.gotWrong && !state.usedHint) { pts = 100; state.phaseFirstTry++; state.totalFirstTry++; }
+    else if (!state.gotWrong && state.usedHint) { pts = 70; }
+    else if (state.gotWrong) { pts = 40; }
+    state.phasePoints += pts;
+    state.totalPoints += pts;
+
+    typeText('game-dialog-text', `✅ ${q.feedback}`, () => {
+      setTimeout(() => { state.currentQuestion++; loadQuestion(); }, 3000);
+    });
+    updateHeader();
+  } else {
+    state.gotWrong = true;
+    state.isTyping = false; // reset any in-progress typing before new message
+    btnEl.classList.add('wrong');
+    btnEl.disabled = true;
+    setChefEmotion('chef-game', 'surprised');
+    playSound('wrong');
+
+    // Check if only one option remains — auto-resolve with minimum points
+    const remaining = area.querySelectorAll('.btn-answer:not(:disabled)');
+    if (remaining.length === 1) {
+      state.answered = true;
+      remaining[0].disabled = true;
+      remaining[0].classList.add('correct');
+      state.phasePoints += 10;
+      state.totalPoints += 10;
+      const wf = q.wrongFeedback || 'Não foi dessa vez.';
+      typeText('game-dialog-text', `❌ ${wf} ✅ ${q.feedback}`, () => {
+        setTimeout(() => { state.currentQuestion++; loadQuestion(); }, 3500);
+      });
+      updateHeader();
+    } else {
+      const wf = q.wrongFeedback || 'Não é essa! Tente novamente — analise com calma.';
+      typeText('game-dialog-text', `❌ ${wf}`, () => {
+        setTimeout(() => setChefEmotion('chef-game', ''), 1500);
+      });
+    }
+  }
+}
+
+// ===== PHASE RESULT =====
+function showPhaseResult() {
+  const phase = PHASES[state.currentPhase];
+  const total = phase.questions.length;
+  const pct = (state.phaseFirstTry / total) * 100;
+
+  let stars = 0;
+  if (pct >= 90) stars = 3;
+  else if (pct >= 70) stars = 2;
+  else if (pct >= 50) stars = 1;
+
+  document.getElementById('result-phase-title').textContent = phase.title + ' — CONCLUÍDA!';
+  document.getElementById('result-pts-display').textContent = state.phasePoints + ' pts';
+
+  const starsEl = document.getElementById('result-stars');
+  starsEl.innerHTML = '';
+  for (let i = 0; i < 3; i++) {
+    const s = document.createElement('span');
+    s.className = 'star-big' + (i < stars ? ' earned' : '');
+    s.textContent = '⭐';
+    s.style.animationDelay = (i * 0.25) + 's';
+    starsEl.appendChild(s);
+    if (i < stars) setTimeout(() => playSound('star'), (i+1) * 350);
+  }
+
+  document.getElementById('result-score-text').textContent =
+    `Acertos de 1ª tentativa: ${state.phaseFirstTry}/${total} | Dicas usadas: ${state.hintsUsedPhase}`;
+
+  let msg = '';
+  if (stars === 3) msg = `Incrível, ${state.playerName}! 3 estrelas nesta etapa — você domina o conteúdo!`;
+  else if (stars === 2) msg = `Muito bem, ${state.playerName}! Boa performance. Continue assim!`;
+  else if (stars === 1) msg = `Bom esforço, ${state.playerName}! Revise os cards e tente melhorar.`;
+  else msg = `Não desanime, ${state.playerName}! Revise o conteúdo e você vai melhorar!`;
+
+  document.getElementById('result-dialog').textContent = msg;
+
+  if (stars >= 2) setChefEmotion('chef-result', 'happy');
+  else if (stars === 0) setChefEmotion('chef-result', 'sad');
+  else setChefEmotion('chef-result', '');
+
+  const nextBtn = document.getElementById('btn-next-phase');
+  nextBtn.textContent = state.currentPhase >= PHASES.length - 1 ? '🏆 VER CERTIFICADO' : 'PRÓXIMO SERVIÇO ▶';
+
+  showScreen('screen-phase-result');
+  updateHeader();
+}
+
+function goToNextPhase() {
+  playSound('click');
+  state.currentPhase++;
+  if (state.currentPhase >= PHASES.length) showCertificate();
+  else loadPhaseCards();
+}
+
+// ===== CERTIFICATE =====
+function showCertificate() {
+  // Hide header on certificate screen to avoid 5/4 display
+  document.getElementById('game-header').style.display = 'none';
+
+  const totalQ = PHASES.reduce((acc,p) => acc + p.questions.length, 0);
+  const pct = (state.totalPoints / (totalQ * 100)) * 100;
+
+  let rank, seal;
+  if (pct >= 90) { rank = "👨‍🍳 CHEF MOLECULAR MESTRE"; seal = "🏆"; }
+  else if (pct >= 70) { rank = "🍳 COZINHEIRO CIENTÍFICO"; seal = "🥈"; }
+  else if (pct >= 50) { rank = "🥄 AUXILIAR DE COZINHA"; seal = "🥉"; }
+  else { rank = "🧑‍🎓 ESTAGIÁRIO DO RESTAURANTE"; seal = "📚"; }
+
+  const stars = pct >= 90 ? 3 : pct >= 70 ? 2 : pct >= 50 ? 1 : 0;
+
+  document.querySelector('.cert-seal').textContent = seal;
+  document.getElementById('cert-name').textContent = state.playerName;
+  document.getElementById('cert-rank').textContent = rank;
+  document.getElementById('cert-stars').textContent = '⭐'.repeat(stars) + '☆'.repeat(3-stars);
+  document.getElementById('cert-pts').textContent = `${state.totalPoints} / ${totalQ * 100} pontos`;
+
+  showScreen('screen-certificate');
+  playSound('victory');
+}
+
+// ===== UTILITIES =====
+function setChefEmotion(id, emotion) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = 'chef' + (emotion ? ' ' + emotion : '');
+}
+
+function typeText(elId, text, cb) {
+  if (state.isTyping) {
+    document.getElementById(elId).textContent = text;
+    if (cb) cb();
+    return;
+  }
+  state.isTyping = true;
+  const el = document.getElementById(elId);
+  el.textContent = '';
+  let i = 0;
+  function type() {
+    if (i < text.length) {
+      el.textContent += text.charAt(i++);
+      setTimeout(type, 18);
+    } else {
+      state.isTyping = false;
+      if (cb) cb();
+    }
+  }
+  type();
+}
+
+function updateHeader() {
+  document.getElementById('ui-phase').textContent = `${state.currentPhase+1}/4`;
+  document.getElementById('ui-pts').textContent = state.totalPoints + ' pts';
+  // Stars in header now reflect current phase's first-try accuracy, consistent with phase result screen
+  const total = PHASES[state.currentPhase].questions.length;
+  const pct = total > 0 ? (state.phaseFirstTry / total) * 100 : 0;
+  const stars = pct >= 90 ? 3 : pct >= 70 ? 2 : pct >= 50 ? 1 : 0;
+  document.getElementById('ui-stars').textContent = '⭐'.repeat(stars) + '☆'.repeat(3-stars);
+}
+
+function updateProgressBar() {
+  const totalQ = PHASES.reduce((acc,p) => acc + p.questions.length, 0);
+  let done = 0;
+  for (let i = 0; i < state.currentPhase; i++) done += PHASES[i].questions.length;
+  done += state.currentQuestion;
+  document.getElementById('progress-bar').style.width = ((done/totalQ)*100) + '%';
+}
+</script>
+</body>
+</html>
